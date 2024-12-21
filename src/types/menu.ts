@@ -64,11 +64,14 @@ export interface MenuCategory {
   _id: string;
   name: string;
   description?: string;
+  isGlobal : boolean;
   created_at: string;
   updated_at: string;
 }
 
 export interface CreateCategoryDto {
   name: string;
+  isGlobal : boolean;
+  branch : string;
   description?: string;
 }

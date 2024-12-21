@@ -29,11 +29,11 @@ export const menuService = {
     api.put<MenuItem>(`/food-items/${id}`, { isAvailable },{params : {branchId}}),
 
   // Categories
-  getAllCategories: () =>
-    api.get<CategoriesResponse>('/categories'),
+  getAllCategories: (branchId : string) =>
+    api.get<CategoriesResponse>('/categories',{params : {condition : {$or : [{branch : branchId},{isGlobal : true}]}}}),
   
   createCategory: (data: CreateCategoryDto) =>
-    api.post<MenuCategory>('/categories', data),
+    api.post<MenuCategory>('/category', data),
   
   updateCategory: (id: string, data: Partial<CreateCategoryDto>) =>
     api.patch<MenuCategory>(`/categories/${id}`, data),

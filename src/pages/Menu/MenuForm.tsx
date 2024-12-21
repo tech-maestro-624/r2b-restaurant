@@ -20,7 +20,9 @@ import {
   Grid,
   Radio,
   RadioGroup,
-  FormLabel
+  FormLabel,
+  Dialog,
+  CircularProgress,
 } from '@mui/material';
 import { Plus, Trash2 } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -37,6 +39,11 @@ interface MenuFormProps {
 }
 
 export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
+  const [filteredCategories, setFilteredCategories] = useState(categories);
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  const [newCategoryName,setNewCategoryName] = useState('')
+
   const { selectedBranch } = useBranch();
   const queryClient = useQueryClient();
 
@@ -119,6 +126,7 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
         `Failed to ${item ? 'update' : 'create'} menu item`
       ),
   });
+  
 
   useEffect(() => {
     const fetchImage = async () => {
@@ -225,31 +233,99 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
           />
 
           {/* Category */}
-          <Controller
-            name="category"
-            control={control}
-            rules={{ required: 'Category is required' }}
-            render={({ field }) => (
-              <FormControl fullWidth error={!!errors.category}>
-                <InputLabel>Category</InputLabel>
-                <Select {...field} label="Category">
-                  <MuiMenuItem value="">
-                    <em>None</em>
-                  </MuiMenuItem>
-                  {categories.map((cat) => (
-                    <MuiMenuItem key={cat._id} value={cat._id}>
-                      {cat.name}
+         
+            {/* Category */}
+            <Controller
+              name="category"
+              control={control}
+              rules={{ required: 'Category is required' }}
+              render={({ field }) => (
+                <FormControl fullWidth error={!!errors.category}>
+                  <InputLabel>Category</InputLabel>
+                  <Select {...field} label="Category">
+                    <MuiMenuItem value="">
+                      <em>None</em>
                     </MuiMenuItem>
-                  ))}
-                </Select>
-                {errors.category && (
-                  <Typography color="error" variant="body2">
-                    {errors.category.message}
-                  </Typography>
-                )}
-              </FormControl>
-            )}
-          />
+                    {filteredCategories.map((cat) => (
+                      <MuiMenuItem key={cat._id} value={cat._id}>
+                        {cat.name}
+                      </MuiMenuItem>
+                    ))}
+                  </Select>
+                  {errors.category && (
+                    <Typography color="error" variant="body2">
+                      {errors.category.message}
+                    </Typography>
+                  )}
+                </FormControl>
+              )}
+            />
+            <Button
+              color="primary"
+              onClick={() => setShowCategoryForm(true)}
+              sx={{ mt: 1 }}
+            >
+              Can't find your category? Create one.
+            </Button>
+
+            {showCategoryForm && (
+  <Dialog open onClose={() => setShowCategoryForm(false)}>
+    <DialogTitle>Create a Category</DialogTitle>
+    <DialogContent>
+      <TextField
+        label="Category Name"
+        fullWidth
+        autoFocus
+        value={newCategoryName}
+        onChange={(e) => setNewCategoryName(e.target.value.trim())}
+        disabled={isCreatingCategory}
+      />
+    </DialogContent>
+    <DialogActions>
+      <Button
+        onClick={() => setShowCategoryForm(false)}
+        disabled={isCreatingCategory}
+      >
+        Cancel
+      </Button>
+      <Button
+        onClick={async () => {
+          if (newCategoryName) {
+            try {
+              setIsCreatingCategory(true);
+              const response = await menuService.createCategory({
+                name: newCategoryName,
+                isGlobal: false,
+                branch: selectedBranch?._id,
+              });
+              const createdCategory = response.data;
+
+              // Update categories and set the new one as selected
+              setFilteredCategories((prev) => [...prev, createdCategory]);
+              setValue('category', createdCategory._id);
+
+              // Close dialog
+              setShowCategoryForm(false);
+            } catch (error) {
+              handleApiError(error, 'Failed to create category');
+            } finally {
+              setIsCreatingCategory(false);
+            }
+          }
+        }}
+        variant="contained"
+        disabled={isCreatingCategory || !newCategoryName}
+      >
+        {isCreatingCategory ? (
+          <CircularProgress size={24} sx={{ ml: 2 }} />
+        ) : (
+          'Create'
+        )}
+      </Button>
+    </DialogActions>
+  </Dialog>
+)}
+
 
           {/* Tax Slab as RadioGroup */}
           <Controller

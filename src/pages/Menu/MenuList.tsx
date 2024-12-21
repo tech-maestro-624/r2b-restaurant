@@ -93,7 +93,7 @@ function MenuItemCard({
           {item.description}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-          <Chip label={getCategoryName(item.category._id)} size="small" />
+          <Chip label={getCategoryName(item.category?._id)} size="small" />
           {/* Remove preparationTime if not in type */}
           {/* <Chip label={`${item.preparationTime} mins`} size="small" variant="outlined" /> */}
         </Box>
@@ -139,8 +139,10 @@ export default function MenuList() {
   });
 
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
-    queryKey: ['menu-categories'],
-    queryFn: () => menuService.getAllCategories().then((res) => res.data.categories),
+    queryKey: ['menu-categories',selectedBranch?._id],
+    queryFn: () => menuService.getAllCategories(selectedBranch._id).then((res) => res.data.categories),
+    enabled: !!selectedBranch,
+
   });
 
   const deleteMutation = useMutation({
@@ -208,6 +210,8 @@ export default function MenuList() {
         value={selectedCategory}
         onChange={(_, value) => setSelectedCategory(value)}
         sx={{ mb: 3 }}
+        variant='scrollable'
+        scrollButtons='auto'
       >
         <Tab label="All Items" value="all" />
         {categories.map((category: MenuCategory) => (

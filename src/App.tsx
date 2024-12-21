@@ -14,6 +14,7 @@ import BranchList from './pages/Branches/BranchList';
 import MenuList from './pages/Menu/MenuList';
 import OrderList from './pages/Orders/OrderList';
 import OrderDetailsPage from './components/order/orderDetails';
+import CouponsList from './pages/Coupons/couponsList';
 const theme = createTheme({
   palette: {
     primary: {
@@ -54,6 +55,7 @@ function App() {
                       <Route path="/menu" element={<MenuList />} />
                       <Route path="/orders" element={<OrderList />} />
                       <Route path="/orders/:id" element={<OrderDetailsPage />} />
+                      <Route path="/coupons" element={<CouponsList />} />
                     </Route>
                   </Route>
                 </Routes>

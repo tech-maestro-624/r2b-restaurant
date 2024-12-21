@@ -46,6 +46,8 @@ export default function Sidebar({ open, onClose, variant }: SidebarProps) {
     },
     { path: '/menu', label: 'Menu', icon: <MenuIcon size={20} /> },
     { path: '/orders', label: 'Orders', icon: <ShoppingBag size={20} /> },
+    { path: '/coupons', label: 'Coupons', icon: <ShoppingBag size={20} /> },
+
     // { path: '/customers', label: 'Customers', icon: <Users size={20} /> },
     { path: '/settings', label: 'Settings', icon: <Settings size={20} /> },
   ];

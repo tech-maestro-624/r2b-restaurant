@@ -5,7 +5,7 @@ import { branchService } from '../services/branch.service';
 import { useAuth } from './AuthContext';
 
 interface BranchContextType {
-  selectedBranch: Branch | null;
+  selectedBranch: Branch | '';
   setSelectedBranch: (branch: Branch | null) => void;
   branches: Branch[];
   isLoading: boolean;
