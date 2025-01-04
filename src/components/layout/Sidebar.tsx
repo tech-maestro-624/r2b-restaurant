@@ -40,7 +40,7 @@ export default function Sidebar({ open, onClose, variant }: SidebarProps) {
       label: 'Restaurant',
       icon: <Store size={20} />,
       children: [
-        { path: '/restaurants', label: 'Restaurants', icon: <Store size={20} /> },
+        // { path: '/restaurants', label: 'Restaurants', icon: <Store size={20} /> },
         { path: '/branches', label: 'Branches', icon: <Map size={20} /> },
       ],
     },

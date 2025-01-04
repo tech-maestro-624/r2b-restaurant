@@ -28,7 +28,6 @@ import ConfirmDialog from '../../components/common/ConfirmDialog';
 import { handleApiError } from '../../utils/error-handler';
 import LoadingScreen from '../../components/common/LoadingScreen';
 
-// A helper component for each menu item card
 function MenuItemCard({
   item,
   categories,
@@ -42,9 +41,8 @@ function MenuItemCard({
   onDelete: (id: string) => void;
   onToggleAvailability: (id: string, isAvailable: boolean) => void;
 }) {
-  const imageId = item.image?.[0]; // Assuming item.image is an array of file IDs (strings)
+  const imageId = item.image?.[0];
 
-  // Fetch image URL if imageId exists
   const { data: imageUrl, isLoading: imageLoading, isError: imageError } = useQuery({
     queryKey: ['file', imageId],
     queryFn: () => fileService.get(imageId!).then((res) => res.data.data),
@@ -94,8 +92,6 @@ function MenuItemCard({
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <Chip label={getCategoryName(item.category?._id)} size="small" />
-          {/* Remove preparationTime if not in type */}
-          {/* <Chip label={`${item.preparationTime} mins`} size="small" variant="outlined" /> */}
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <FormControlLabel
@@ -129,27 +125,32 @@ export default function MenuList() {
   const { selectedBranch } = useBranch();
   const queryClient = useQueryClient();
 
-  const { data: menuItems = [], isLoading: menuLoading } = useQuery({
+  const { data: menuItems = {}, isLoading: menuLoading } = useQuery({
     queryKey: ['menu-items', selectedBranch?._id],
     queryFn: () =>
       selectedBranch
         ? menuService.getAllItems(selectedBranch._id).then((res) => res.data)
-        : Promise.resolve([]),
+        : Promise.resolve({}),
     enabled: !!selectedBranch,
   });
 
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
-    queryKey: ['menu-categories',selectedBranch?._id],
+    queryKey: ['menu-categories', selectedBranch?._id],
     queryFn: () => menuService.getAllCategories(selectedBranch._id).then((res) => res.data.categories),
     enabled: !!selectedBranch,
-
   });
+
+  const flattenedMenuItems = Object.values(menuItems).flat();
+
+  const filteredItems = selectedCategory === 'all'
+    ? flattenedMenuItems
+    : flattenedMenuItems.filter((item) => item.category?._id === selectedCategory);
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) =>
       selectedBranch ? menuService.deleteItem(selectedBranch._id, id) : Promise.reject('No branch selected'),
     onSuccess: () => {
-      queryClient.invalidateQueries(['menu-items', selectedBranch?._id]); // Pass key array directly
+      queryClient.invalidateQueries(['menu-items', selectedBranch?._id]);
       setDeleteConfirm(null);
     },
     onError: (error) => handleApiError(error, 'Failed to delete menu item'),
@@ -161,7 +162,7 @@ export default function MenuList() {
         ? menuService.toggleAvailability(selectedBranch._id, id, isAvailable)
         : Promise.reject('No branch selected'),
     onSuccess: () => {
-      queryClient.invalidateQueries(['menu-items', selectedBranch?._id]); // Pass key array directly
+      queryClient.invalidateQueries(['menu-items', selectedBranch?._id]);
     },
     onError: (error) => handleApiError(error, 'Failed to update availability'),
   });
@@ -194,10 +195,6 @@ export default function MenuList() {
 
   if (menuLoading || categoriesLoading) return <LoadingScreen />;
 
-  const filteredItems = selectedCategory === 'all'
-    ? menuItems
-    : menuItems.filter((item) => item.category._id === selectedCategory);
-
   return (
     <Box>
       <PageHeader
@@ -210,8 +207,8 @@ export default function MenuList() {
         value={selectedCategory}
         onChange={(_, value) => setSelectedCategory(value)}
         sx={{ mb: 3 }}
-        variant='scrollable'
-        scrollButtons='auto'
+        variant="scrollable"
+        scrollButtons="auto"
       >
         <Tab label="All Items" value="all" />
         {categories.map((category: MenuCategory) => (
@@ -220,17 +217,23 @@ export default function MenuList() {
       </Tabs>
 
       <Grid container spacing={3}>
-        {filteredItems.map((item) => (
-          <Grid item xs={12} sm={6} md={4} key={item._id}>
-            <MenuItemCard
-              item={item}
-              categories={categories}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onToggleAvailability={handleToggleAvailability}
-            />
-          </Grid>
-        ))}
+        {filteredItems.length > 0 ? (
+          filteredItems.map((item) => (
+            <Grid item xs={12} sm={6} md={4} key={item._id}>
+              <MenuItemCard
+                item={item}
+                categories={categories}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onToggleAvailability={handleToggleAvailability}
+              />
+            </Grid>
+          ))
+        ) : (
+          <Typography variant="body2" sx={{ mt: 2 }}>
+            No items available in this category.
+          </Typography>
+        )}
       </Grid>
 
       <Dialog
@@ -252,7 +255,6 @@ export default function MenuList() {
         message="Are you sure you want to delete this menu item?"
         onConfirm={() => deleteConfirm && deleteMutation.mutate(deleteConfirm)}
         onCancel={() => setDeleteConfirm(null)}
-        // Use isLoading, not isPending
         loading={deleteMutation.isLoading}
       />
     </Box>

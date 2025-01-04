@@ -9,7 +9,6 @@ import Login from './components/auth/Login';
 import OTPVerification from './components/auth/OTPVerification';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
-import RestaurantList from './pages/Restaurants/RestaurantList';
 import BranchList from './pages/Branches/BranchList';
 import MenuList from './pages/Menu/MenuList';
 import OrderList from './pages/Orders/OrderList';
@@ -50,7 +49,6 @@ function App() {
                     <Route element={<MainLayout />}>
                       <Route path="/" element={<Dashboard />} />
                       <Route path="/dashboard" element={<Dashboard />} />
-                      <Route path="/restaurants" element={<RestaurantList />} />
                       <Route path="/branches" element={<BranchList />} />
                       <Route path="/menu" element={<MenuList />} />
                       <Route path="/orders" element={<OrderList />} />

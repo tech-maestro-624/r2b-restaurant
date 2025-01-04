@@ -13,6 +13,8 @@ export interface ICoupon {
     branches?: string[];        // or mongoose.Schema.Types.ObjectId[]
     createdAt?: Date;
     updatedAt?: Date;
+    minCartValue? : number;
+    freeShipping? : boolean;
 }
 
 export const Coupons = {

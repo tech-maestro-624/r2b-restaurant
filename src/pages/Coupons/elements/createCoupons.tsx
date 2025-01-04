@@ -10,6 +10,9 @@ import {
   Select,
   Checkbox,
   ListItemText,
+  FormGroup,
+  FormControlLabel,
+  Switch,
 } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material/Select';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -32,6 +35,8 @@ const CouponForm: React.FC<CouponFormProps> = ({ coupon, onClose }) => {
     validTo: undefined,
     createdBy: 'Company',
     branches: [],
+    minCartValue : 0,
+    freeShipping : false
   });
 
   const { enqueueSnackbar } = useSnackbar();
@@ -73,14 +78,24 @@ const CouponForm: React.FC<CouponFormProps> = ({ coupon, onClose }) => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
+    const { name, type, value, checked } = e.target;
+    // Determine the value based on input type
+    const fieldValue = type === 'checkbox' ? checked : value;
+  
+    // Handle specific fields
     if (name === 'validFrom' || name === 'validTo') {
-      setFormData((prev) => ({ ...prev, [name]: new Date(value) }));
+      setFormData((prev) => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : new Date(value),
+      }));
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({
+        ...prev,
+        [name]: fieldValue,
+      }));
     }
   };
-
+  
   const handleBranchChange = (event: SelectChangeEvent<string[]>) => {
     const { value } = event.target;
     setFormData((prev) => ({
@@ -131,6 +146,7 @@ const CouponForm: React.FC<CouponFormProps> = ({ coupon, onClose }) => {
       >
         <MenuItem value="Percentage">Percentage</MenuItem>
         <MenuItem value="Amount">Amount</MenuItem>
+        <MenuItem value="Free Shipping">Free Shipping</MenuItem>
       </TextField>
       <TextField
         label="Value"
@@ -170,6 +186,31 @@ const CouponForm: React.FC<CouponFormProps> = ({ coupon, onClose }) => {
         InputLabelProps={{ shrink: true }}
         sx={{ mb: 2 }}
       />
+      <TextField
+        label="Min Cart Value"
+        name="minCartValue"
+        type="number"
+        value={
+          formData.minCartValue
+        }
+        onChange={handleChange}
+        fullWidth
+        InputLabelProps={{ shrink: true }}
+        sx={{ mb: 2 }}
+      />
+   <FormGroup>
+  <FormControlLabel
+    control={
+      <Switch
+        checked={!!formData.freeShipping}
+        onChange={handleChange}
+        name="freeShipping"
+        color="primary"
+      />
+    }
+    label="Free Shipping Coupon?"
+  />
+</FormGroup>
       {branchData?.branches && (
         <FormControl fullWidth sx={{ mb: 2 }}>
           <InputLabel id="branch-select-label">Branches</InputLabel>

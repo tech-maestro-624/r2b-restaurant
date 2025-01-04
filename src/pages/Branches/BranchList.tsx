@@ -1,3 +1,5 @@
+// src/pages/BranchList.jsx
+
 import { useState } from 'react';
 import {
   Box,
@@ -28,17 +30,38 @@ export default function BranchList() {
   const [page, setPage] = useState(1);
   const queryClient = useQueryClient();
 
+  // Fetch branches with pagination
   const { data: branchData, isLoading } = useQuery({
     queryKey: ['branches', page],
     queryFn: () => branchService.getAll(page).then((res) => res.data),
   });
 
-  console.log(branchData)
+  // Mutation for creating a branch
+  const createBranchMutation = useMutation({
+    mutationFn: (newBranch) => branchService.create(newBranch),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['branches', page]);
+      setOpenForm(false);
+    },
+    onError: (error) => handleApiError(error, 'Failed to create branch'),
+  });
 
+  // Mutation for updating a branch
+  const updateBranchMutation = useMutation({
+    mutationFn: ({ id, data }) => branchService.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['branches', page]);
+      setOpenForm(false);
+      setSelectedBranch(null);
+    },
+    onError: (error) => handleApiError(error, 'Failed to update branch'),
+  });
+
+  // Mutation for deleting a branch
   const deleteMutation = useMutation({
     mutationFn: (id: string) => branchService.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['branches'] });
+      queryClient.invalidateQueries(['branches', page]);
       setDeleteConfirm(null);
     },
     onError: (error) => handleApiError(error, 'Failed to delete branch'),
@@ -64,6 +87,21 @@ export default function BranchList() {
     setPage(value);
   };
 
+  // Handle form submission for both create and update
+  const handleFormSubmit = (processedData) => {
+    if (selectedBranch) {
+      // Update existing branch
+      updateBranchMutation.mutate({
+        id: selectedBranch._id,
+        data: processedData,
+      });
+    } else {
+      // Create new branch
+      createBranchMutation.mutate(processedData);
+    }
+  };
+
+  // Empty state when no branches are found
   if (!branchData?.branches.length && page === 1) {
     return (
       <Box>
@@ -79,10 +117,17 @@ export default function BranchList() {
         <Dialog
           open={openForm}
           onClose={handleCloseForm}
-          maxWidth="sm"
           fullWidth
+          maxWidth={false}
+          PaperProps={{
+            sx: {
+              width: '90vw',
+              maxWidth: '90vw',
+              margin: 'auto',
+            },
+          }}
         >
-          <BranchForm onClose={handleCloseForm} />
+          <BranchForm onClose={handleCloseForm} onSubmit={handleFormSubmit} />
         </Dialog>
       </Box>
     );
@@ -122,7 +167,7 @@ export default function BranchList() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                   <Phone size={16} />
                   <Typography variant="body2" color="text.secondary">
-                    {branch.phone}
+                    {branch.phoneNumber}
                   </Typography>
                 </Box>
 
@@ -148,6 +193,7 @@ export default function BranchList() {
         ))}
       </Grid>
 
+      {/* Pagination */}
       {branchData && branchData.totalPages > 1 && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           <Pagination
@@ -159,25 +205,35 @@ export default function BranchList() {
         </Box>
       )}
 
+      {/* Dialog for Add/Edit Branch */}
       <Dialog
         open={openForm}
         onClose={handleCloseForm}
-        maxWidth="sm"
         fullWidth
+        maxWidth={false}
+        PaperProps={{
+          sx: {
+            width: '90vw', // 90% of viewport width
+            maxWidth: '90vw',
+            margin: 'auto',
+          },
+        }}
       >
         <BranchForm
           branch={selectedBranch}
           onClose={handleCloseForm}
+          onSubmit={handleFormSubmit}
         />
       </Dialog>
 
+      {/* Confirm Delete Dialog */}
       <ConfirmDialog
         open={!!deleteConfirm}
         title="Delete Branch"
         message="Are you sure you want to delete this branch?"
         onConfirm={() => deleteConfirm && deleteMutation.mutate(deleteConfirm)}
         onCancel={() => setDeleteConfirm(null)}
-        loading={deleteMutation.isPending}
+        loading={deleteMutation.isLoading}
       />
     </Box>
   );

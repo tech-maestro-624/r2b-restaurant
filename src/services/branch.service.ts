@@ -9,6 +9,9 @@ interface BranchResponse {
 }
 
 const user = JSON.parse(localStorage.getItem('restaurant_admin_user') || '{}');
+const resturant = JSON.parse(localStorage.getItem('selected_branch') || '{}');
+
+
 export const branchService = {
   getAll: (page = 1, limit = 10) => 
     api.get<BranchResponse>('/branches', {
@@ -22,12 +25,28 @@ export const branchService = {
   getById: (id: string) =>
     api.get<Branch>(`/branches/${id}`),
   
-  create: (data: CreateBranchDto) =>
-    api.post<Branch>('/branches', data),
+  create: (data: CreateBranchDto) =>{
+    let updated = {
+      ...data, 
+      restaurant : resturant.restaurant._id
+    }
+    api.post<Branch>('/branch', updated)},
   
-  update: (id: string, data: Partial<CreateBranchDto>) =>
-    api.patch<Branch>(`/branches/${id}`, data),
+  update: (id: string, data: Partial<CreateBranchDto>) =>{
+    console.log(id, data);
+    
+    api.put<Branch>(`/branch/${id}`, data)},
   
   delete: (id: string) =>
     api.delete(`/branches/${id}`),
+
+  getStats: (id: string) => {
+    console.log(id);
+    return api.get(`/branch-stats/${id}`);
+  },
+
+  getBalance: (id: string) => {
+    return api.get(`/branch-balance/${id}`);
+  }
+  
 };

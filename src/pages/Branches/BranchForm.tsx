@@ -1,111 +1,432 @@
-import { useForm } from 'react-hook-form';
+// src/pages/BranchForm.jsx
+
+import React from 'react';
+import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import {
   Box,
   Button,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Grid,
   TextField,
+  Typography,
+  Switch,
+  FormControlLabel,
 } from '@mui/material';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { branchService } from '../../services/branch.service';
-import { Branch, CreateBranchDto } from '../../types/branch';
-import { handleApiError } from '../../utils/error-handler';
 
-interface BranchFormProps {
-  branch?: Branch | null;
-  onClose: () => void;
-}
+// Days of the week constant
+const daysOfWeek = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+];
 
-export default function BranchForm({ branch, onClose }: BranchFormProps) {
+// Helper function to initialize operational hours
+const initializeOperationalHours = (existingOperationalHours) => {
+  // Create a map for quick lookup
+  const operationalHoursMap = {};
+  if (existingOperationalHours && existingOperationalHours.length > 0) {
+    existingOperationalHours.forEach((oh) => {
+      operationalHoursMap[oh.dayOfWeek] = oh;
+    });
+  }
+
+  // Initialize all days
+  return daysOfWeek.map((day) => {
+    if (operationalHoursMap[day]) {
+      return {
+        dayOfWeek: day,
+        isOpen: operationalHoursMap[day].isOpen,
+        periods: operationalHoursMap[day].isOpen
+          ? [
+              {
+                openingTime: operationalHoursMap[day].periods[0].openingTime || '00:00',
+                closingTime: operationalHoursMap[day].periods[0].closingTime || '00:00',
+              },
+            ]
+          : [{ openingTime: '00:00', closingTime: '00:00' }],
+      };
+    } else {
+      // If the day is not present, default to isOpen: false
+      return {
+        dayOfWeek: day,
+        isOpen: false,
+        periods: [{ openingTime: '00:00', closingTime: '00:00' }],
+      };
+    }
+  });
+};
+
+export default function BranchForm({ branch, onClose, onSubmit }) {
   const {
-    register,
+    control,
     handleSubmit,
+    register,
+    setValue,
+    watch,
     formState: { errors },
-  } = useForm<CreateBranchDto>({
-    defaultValues: branch || {
-      name: '',
-      address: '',
-      phone: '',
+  } = useForm({
+    defaultValues: {
+      name: branch?.name || '',
+      address: branch?.address || '',
+      phoneNumber: branch?.phoneNumber || '',
+      gstLicense: branch?.gstLicense || '',
+      fssaiLicense: branch?.fssaiLicense || '',
+      isOperational: branch?.isOperational ?? true,
+      deliveryMethod: branch?.deliveryMethod || '',
+      freeShippingLimit: branch?.freeShippingLimit || '',
+      location: {
+        coordinates: branch?.location?.coordinates
+          ? branch.location.coordinates.map((coord) => String(coord))
+          : ['', ''],
+      },
+      operationalHours: initializeOperationalHours(branch?.operationalHours),
     },
   });
 
-  const queryClient = useQueryClient();
-
-  const mutation = useMutation({
-    mutationFn: (data: CreateBranchDto) =>
-      branch
-        ? branchService.update(branch.id, data)
-        : branchService.create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['branches'] });
-      onClose();
-    },
-    onError: (error) =>
-      handleApiError(
-        error,
-        `Failed to ${branch ? 'update' : 'create'} branch`
-      ),
+  const { fields } = useFieldArray({
+    control,
+    name: 'operationalHours',
   });
 
-  const onSubmit = (data: CreateBranchDto) => {
-    mutation.mutate(data);
+  // Watch operationalHours to react to changes
+  const operationalHoursWatch = watch('operationalHours');
+
+  const handleFormSubmit = (data) => {
+    const processedData = {
+      ...data,
+      isOperational: data.isOperational,
+      freeShippingLimit: Number(data.freeShippingLimit),
+      location: {
+        type: 'Point',
+        coordinates: data.location.coordinates.map((coord) => Number(coord)),
+      },
+      operationalHours: data.operationalHours.map((oh) => ({
+        dayOfWeek: oh.dayOfWeek,
+        isOpen: oh.isOpen,
+        periods: oh.isOpen
+          ? [
+              {
+                openingTime: oh.periods[0].openingTime,
+                closingTime: oh.periods[0].closingTime,
+              },
+            ]
+          : [],
+      })),
+    };
+    console.log('Submitting branch data:', processedData); // Logging the processed data
+    onSubmit(processedData);
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-      <DialogTitle>
-        {branch ? 'Edit Branch' : 'Add Branch'}
-      </DialogTitle>
-      <DialogContent>
-        <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <TextField
-            label="Branch Name"
-            fullWidth
-            {...register('name', { required: 'Branch name is required' })}
-            error={!!errors.name}
-            helperText={errors.name?.message}
-          />
+    <form onSubmit={handleSubmit(handleFormSubmit)} style={{ width: '100%' }}>
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          {branch ? 'Edit Branch' : 'Add Branch'}
+        </Typography>
 
-          <TextField
-            label="Address"
-            fullWidth
-            multiline
-            rows={3}
-            {...register('address', { required: 'Address is required' })}
-            error={!!errors.address}
-            helperText={errors.address?.message}
-          />
+        <Grid container spacing={2}>
+          {/* Left Section: General Details */}
+          <Grid item xs={12} md={6}>
+            <Grid container spacing={2}>
+              {/* Name */}
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Name"
+                  {...register('name', { required: 'Branch name is required' })}
+                  error={!!errors.name}
+                  helperText={errors.name?.message}
+                />
+              </Grid>
 
-          <TextField
-            label="Phone Number"
-            fullWidth
-            {...register('phone', {
-              required: 'Phone number is required',
-              pattern: {
-                value: /^[0-9]{10}$/,
-                message: 'Please enter a valid 10-digit phone number',
-              },
-            })}
-            error={!!errors.phone}
-            helperText={errors.phone?.message}
-          />
-        </Box>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button
-          type="submit"
-          variant="contained"
-          disabled={mutation.isPending}
+              {/* Address */}
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Address"
+                  {...register('address', { required: 'Address is required' })}
+                  error={!!errors.address}
+                  helperText={errors.address?.message}
+                />
+              </Grid>
+
+              {/* Phone Number */}
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Phone Number"
+                  {...register('phoneNumber', {
+                    required: 'Phone number is required',
+                    pattern: {
+                      value: /^\d{10}$/,
+                      message: 'Invalid phone number',
+                    },
+                  })}
+                  error={!!errors.phoneNumber}
+                  helperText={errors.phoneNumber?.message}
+                />
+              </Grid>
+
+              {/* GST License */}
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="GST License"
+                  {...register('gstLicense', {
+                    required: 'GST License is required',
+                  })}
+                  error={!!errors.gstLicense}
+                  helperText={errors.gstLicense?.message}
+                />
+              </Grid>
+
+              {/* FSSAI License */}
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="FSSAI License"
+                  {...register('fssaiLicense', {
+                    required: 'FSSAI License is required',
+                  })}
+                  error={!!errors.fssaiLicense}
+                  helperText={errors.fssaiLicense?.message}
+                />
+              </Grid>
+
+              {/* Delivery Method */}
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Delivery Method"
+                  {...register('deliveryMethod', {
+                    required: 'Delivery Method is required',
+                  })}
+                  error={!!errors.deliveryMethod}
+                  helperText={errors.deliveryMethod?.message}
+                />
+              </Grid>
+
+              {/* Free Shipping Limit */}
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Free Shipping Limit"
+                  type="number"
+                  {...register('freeShippingLimit', {
+                    required: 'Free Shipping Limit is required',
+                    min: {
+                      value: 0,
+                      message: 'Must be a positive number',
+                    },
+                  })}
+                  error={!!errors.freeShippingLimit}
+                  helperText={errors.freeShippingLimit?.message}
+                />
+              </Grid>
+
+              {/* Is Operational */}
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Controller
+                      name="isOperational"
+                      control={control}
+                      render={({ field }) => (
+                        <Switch
+                          {...field}
+                          checked={field.value}
+                          onChange={(e) => field.onChange(e.target.checked)}
+                          color="primary"
+                        />
+                      )}
+                    />
+                  }
+                  label="Is Operational"
+                />
+              </Grid>
+
+              {/* Location Coordinates */}
+              <Grid item xs={12}>
+                <Typography variant="subtitle1" gutterBottom>
+                  Location Coordinates
+                </Typography>
+                <Grid container spacing={1}>
+                  <Grid item xs={6}>
+                    <TextField
+                      fullWidth
+                      label="Longitude"
+                      // type="number"
+                      {...register('location.coordinates.0', {
+                        required: 'Longitude is required',
+                      })}
+                      error={!!errors.location?.coordinates?.[0]}
+                      helperText={errors.location?.coordinates?.[0]?.message}
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      fullWidth
+                      label="Latitude"
+                      // type="number"
+                      {...register('location.coordinates.1', {
+                        required: 'Latitude is required',
+                      })}
+                      error={!!errors.location?.coordinates?.[1]}
+                      helperText={errors.location?.coordinates?.[1]?.message}
+                    />
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+
+          {/* Right Section: Operational Hours */}
+          <Grid item xs={12} md={6}>
+            <Typography variant="subtitle1" gutterBottom>
+              Operational Hours
+            </Typography>
+            <Grid container spacing={2}>
+              {fields.map((field, index) => (
+                <Grid
+                  container
+                  item
+                  xs={12}
+                  key={field.id}
+                  alignItems="center"
+                  spacing={1}
+                >
+                  {/* Day of the Week */}
+                  <Grid item xs={3}>
+                    <Typography>{field.dayOfWeek}</Typography>
+                  </Grid>
+
+                  {/* Is Open Switch */}
+                  <Grid item xs={2}>
+                    <Controller
+                      name={`operationalHours.${index}.isOpen`}
+                      control={control}
+                      render={({ field: controllerField }) => (
+                        <Switch
+                          {...controllerField}
+                          checked={controllerField.value}
+                          onChange={(e) => {
+                            controllerField.onChange(e.target.checked);
+                            if (!e.target.checked) {
+                              setValue(
+                                `operationalHours.${index}.periods.0.openingTime`,
+                                '00:00'
+                              );
+                              setValue(
+                                `operationalHours.${index}.periods.0.closingTime`,
+                                '00:00'
+                              );
+                            } else {
+                              // Optionally, reset to '00:00' or another default time
+                              setValue(
+                                `operationalHours.${index}.periods.0.openingTime`,
+                                '00:00'
+                              );
+                              setValue(
+                                `operationalHours.${index}.periods.0.closingTime`,
+                                '00:00'
+                              );
+                            }
+                          }}
+                          color="primary"
+                        />
+                      )}
+                    />
+                  </Grid>
+
+                  {/* Opening Time */}
+                  <Grid item xs={3}>
+                    <TextField
+                      fullWidth
+                      label="Opening Time"
+                      type="time"
+                      disabled={!operationalHoursWatch[index].isOpen}
+                      {...register(
+                        `operationalHours.${index}.periods.0.openingTime`,
+                        {
+                          required: operationalHoursWatch[index].isOpen
+                            ? 'Opening time is required'
+                            : false,
+                        }
+                      )}
+                      error={
+                        !!errors.operationalHours?.[index]?.periods?.[0]
+                          ?.openingTime
+                      }
+                      helperText={
+                        errors.operationalHours?.[index]?.periods?.[0]
+                          ?.openingTime?.message
+                      }
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      inputProps={{
+                        step: 1800, // 30 min
+                      }}
+                    />
+                  </Grid>
+
+                  {/* Closing Time */}
+                  <Grid item xs={3}>
+                    <TextField
+                      fullWidth
+                      label="Closing Time"
+                      type="time"
+                      disabled={!operationalHoursWatch[index].isOpen}
+                      {...register(
+                        `operationalHours.${index}.periods.0.closingTime`,
+                        {
+                          required: operationalHoursWatch[index].isOpen
+                            ? 'Closing time is required'
+                            : false,
+                        }
+                      )}
+                      error={
+                        !!errors.operationalHours?.[index]?.periods?.[0]
+                          ?.closingTime
+                      }
+                      helperText={
+                        errors.operationalHours?.[index]?.periods?.[0]
+                          ?.closingTime?.message
+                      }
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      inputProps={{
+                        step: 1800, // 30 min
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              ))}
+            </Grid>
+          </Grid>
+        </Grid>
+
+        {/* Form Actions */}
+        <Box
+          sx={{
+            mt: 3,
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: 2,
+          }}
         >
-          {mutation.isPending
-            ? 'Saving...'
-            : branch
-            ? 'Update'
-            : 'Create'}
-        </Button>
-      </DialogActions>
-    </Box>
+          <Button variant="outlined" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button variant="contained" color="primary" type="submit">
+            {branch ? 'Update Branch' : 'Create Branch'}
+          </Button>
+        </Box>
+      </Box>
+    </form>
   );
 }
