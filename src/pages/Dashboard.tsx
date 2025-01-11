@@ -380,7 +380,7 @@ export default function Dashboard() {
   const statsData = stats
     ? [
         {
-          title: 'Total Revenue',
+          title: 'Total Earnings',
           value: stats.totalRevenue.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
@@ -543,7 +543,7 @@ export default function Dashboard() {
                 {new Date(subscription?.endDate).toLocaleDateString()}
               </Typography>
               <Typography variant="body1" sx={{ mb: 1 }}>
-                <strong>Order Count:</strong> {subscription?.orderCount}
+                <strong>Order Credits:</strong> {subscription?.orderCount}
               </Typography>
               <Box
                 display="flex"

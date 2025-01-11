@@ -2,12 +2,13 @@ import axios from 'axios';
 import { handleApiError } from './error-handler';
 
 const api = axios.create({
-  baseURL: 'http://192.168.0.104:4000/api',
+  baseURL: 'http://localhost:4000/api',
+  // baseURL : 'https://r2bserver.azurewebsites.net/api',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
     'Cache-Control': 'no-cache',
-    // 'ngrok-skip-browser-warning': 'true',
+    'ngrok-skip-browser-warning': 'true',
   },
   withCredentials: true,
   timeout: 15000, // Increased timeout

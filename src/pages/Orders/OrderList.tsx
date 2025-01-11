@@ -61,7 +61,7 @@ export default function OrderList() {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        Orders - {selectedBranch.name}
+        Orders - {selectedBranch?.name}
       </Typography>
 
       <OrderFilterBar 

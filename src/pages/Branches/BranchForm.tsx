@@ -1,7 +1,7 @@
 // src/pages/BranchForm.jsx
 
-import React from 'react';
-import { useForm, Controller, useFieldArray } from 'react-hook-form';
+import React from "react";
+import { useForm, Controller, useFieldArray } from "react-hook-form";
 import {
   Box,
   Button,
@@ -10,17 +10,17 @@ import {
   Typography,
   Switch,
   FormControlLabel,
-} from '@mui/material';
+} from "@mui/material";
 
 // Days of the week constant
 const daysOfWeek = [
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-  'Sunday',
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
 ];
 
 // Helper function to initialize operational hours
@@ -42,18 +42,20 @@ const initializeOperationalHours = (existingOperationalHours) => {
         periods: operationalHoursMap[day].isOpen
           ? [
               {
-                openingTime: operationalHoursMap[day].periods[0].openingTime || '00:00',
-                closingTime: operationalHoursMap[day].periods[0].closingTime || '00:00',
+                openingTime:
+                  operationalHoursMap[day].periods[0].openingTime || "00:00",
+                closingTime:
+                  operationalHoursMap[day].periods[0].closingTime || "00:00",
               },
             ]
-          : [{ openingTime: '00:00', closingTime: '00:00' }],
+          : [{ openingTime: "00:00", closingTime: "00:00" }],
       };
     } else {
       // If the day is not present, default to isOpen: false
       return {
         dayOfWeek: day,
         isOpen: false,
-        periods: [{ openingTime: '00:00', closingTime: '00:00' }],
+        periods: [{ openingTime: "00:00", closingTime: "00:00" }],
       };
     }
   });
@@ -69,30 +71,31 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      name: branch?.name || '',
-      address: branch?.address || '',
-      phoneNumber: branch?.phoneNumber || '',
-      gstLicense: branch?.gstLicense || '',
-      fssaiLicense: branch?.fssaiLicense || '',
+      name: branch?.name || "",
+      address: branch?.address || "",
+      phoneNumber: branch?.phoneNumber || "",
+      gstLicense: branch?.gstLicense || "",
+      fssaiLicense: branch?.fssaiLicense || "",
       isOperational: branch?.isOperational ?? true,
-      deliveryMethod: branch?.deliveryMethod || '',
-      freeShippingLimit: branch?.freeShippingLimit || '',
+      deliveryMethod: branch?.deliveryMethod || "",
+      freeShippingLimit: branch?.freeShippingLimit || "",
       location: {
         coordinates: branch?.location?.coordinates
           ? branch.location.coordinates.map((coord) => String(coord))
-          : ['', ''],
+          : ["", ""],
       },
       operationalHours: initializeOperationalHours(branch?.operationalHours),
+      serviceableDistance: branch?.serviceableDistance || 8,
     },
   });
 
   const { fields } = useFieldArray({
     control,
-    name: 'operationalHours',
+    name: "operationalHours",
   });
 
   // Watch operationalHours to react to changes
-  const operationalHoursWatch = watch('operationalHours');
+  const operationalHoursWatch = watch("operationalHours");
 
   const handleFormSubmit = (data) => {
     const processedData = {
@@ -100,7 +103,7 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
       isOperational: data.isOperational,
       freeShippingLimit: Number(data.freeShippingLimit),
       location: {
-        type: 'Point',
+        type: "Point",
         coordinates: data.location.coordinates.map((coord) => Number(coord)),
       },
       operationalHours: data.operationalHours.map((oh) => ({
@@ -116,15 +119,14 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
           : [],
       })),
     };
-    console.log('Submitting branch data:', processedData); // Logging the processed data
     onSubmit(processedData);
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} style={{ width: '100%' }}>
+    <form onSubmit={handleSubmit(handleFormSubmit)} style={{ width: "100%" }}>
       <Box sx={{ p: 3 }}>
         <Typography variant="h6" gutterBottom>
-          {branch ? 'Edit Branch' : 'Add Branch'}
+          {branch ? "Edit Branch" : "Add Branch"}
         </Typography>
 
         <Grid container spacing={2}>
@@ -136,7 +138,7 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
                 <TextField
                   fullWidth
                   label="Name"
-                  {...register('name', { required: 'Branch name is required' })}
+                  {...register("name", { required: "Branch name is required" })}
                   error={!!errors.name}
                   helperText={errors.name?.message}
                 />
@@ -147,7 +149,7 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
                 <TextField
                   fullWidth
                   label="Address"
-                  {...register('address', { required: 'Address is required' })}
+                  {...register("address", { required: "Address is required" })}
                   error={!!errors.address}
                   helperText={errors.address?.message}
                 />
@@ -158,11 +160,11 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
                 <TextField
                   fullWidth
                   label="Phone Number"
-                  {...register('phoneNumber', {
-                    required: 'Phone number is required',
+                  {...register("phoneNumber", {
+                    required: "Phone number is required",
                     pattern: {
                       value: /^\d{10}$/,
-                      message: 'Invalid phone number',
+                      message: "Invalid phone number",
                     },
                   })}
                   error={!!errors.phoneNumber}
@@ -175,8 +177,8 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
                 <TextField
                   fullWidth
                   label="GST License"
-                  {...register('gstLicense', {
-                    required: 'GST License is required',
+                  {...register("gstLicense", {
+                    required: "GST License is required",
                   })}
                   error={!!errors.gstLicense}
                   helperText={errors.gstLicense?.message}
@@ -188,8 +190,8 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
                 <TextField
                   fullWidth
                   label="FSSAI License"
-                  {...register('fssaiLicense', {
-                    required: 'FSSAI License is required',
+                  {...register("fssaiLicense", {
+                    required: "FSSAI License is required",
                   })}
                   error={!!errors.fssaiLicense}
                   helperText={errors.fssaiLicense?.message}
@@ -201,8 +203,8 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
                 <TextField
                   fullWidth
                   label="Delivery Method"
-                  {...register('deliveryMethod', {
-                    required: 'Delivery Method is required',
+                  {...register("deliveryMethod", {
+                    required: "Delivery Method is required",
                   })}
                   error={!!errors.deliveryMethod}
                   helperText={errors.deliveryMethod?.message}
@@ -215,11 +217,11 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
                   fullWidth
                   label="Free Shipping Limit"
                   type="number"
-                  {...register('freeShippingLimit', {
-                    required: 'Free Shipping Limit is required',
+                  {...register("freeShippingLimit", {
+                    required: "Free Shipping Limit is required",
                     min: {
                       value: 0,
-                      message: 'Must be a positive number',
+                      message: "Must be a positive number",
                     },
                   })}
                   error={!!errors.freeShippingLimit}
@@ -259,8 +261,8 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
                       fullWidth
                       label="Longitude"
                       // type="number"
-                      {...register('location.coordinates.0', {
-                        required: 'Longitude is required',
+                      {...register("location.coordinates.0", {
+                        required: "Longitude is required",
                       })}
                       error={!!errors.location?.coordinates?.[0]}
                       helperText={errors.location?.coordinates?.[0]?.message}
@@ -271,14 +273,26 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
                       fullWidth
                       label="Latitude"
                       // type="number"
-                      {...register('location.coordinates.1', {
-                        required: 'Latitude is required',
+                      {...register("location.coordinates.1", {
+                        required: "Latitude is required",
                       })}
                       error={!!errors.location?.coordinates?.[1]}
                       helperText={errors.location?.coordinates?.[1]?.message}
                     />
                   </Grid>
                 </Grid>
+              </Grid>
+
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Serviceable Distance (in km)"
+                  {...register("serviceableDistance", {
+                    required: "Serviceable Distance is required",
+                  })}
+                  error={!!errors.serviceableDistance}
+                  helperText={errors.serviceableDistance?.message}
+                />
               </Grid>
             </Grid>
           </Grid>
@@ -317,21 +331,21 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
                             if (!e.target.checked) {
                               setValue(
                                 `operationalHours.${index}.periods.0.openingTime`,
-                                '00:00'
+                                "00:00"
                               );
                               setValue(
                                 `operationalHours.${index}.periods.0.closingTime`,
-                                '00:00'
+                                "00:00"
                               );
                             } else {
                               // Optionally, reset to '00:00' or another default time
                               setValue(
                                 `operationalHours.${index}.periods.0.openingTime`,
-                                '00:00'
+                                "00:00"
                               );
                               setValue(
                                 `operationalHours.${index}.periods.0.closingTime`,
-                                '00:00'
+                                "00:00"
                               );
                             }
                           }}
@@ -352,7 +366,7 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
                         `operationalHours.${index}.periods.0.openingTime`,
                         {
                           required: operationalHoursWatch[index].isOpen
-                            ? 'Opening time is required'
+                            ? "Opening time is required"
                             : false,
                         }
                       )}
@@ -384,7 +398,7 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
                         `operationalHours.${index}.periods.0.closingTime`,
                         {
                           required: operationalHoursWatch[index].isOpen
-                            ? 'Closing time is required'
+                            ? "Closing time is required"
                             : false,
                         }
                       )}
@@ -414,8 +428,8 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
         <Box
           sx={{
             mt: 3,
-            display: 'flex',
-            justifyContent: 'flex-end',
+            display: "flex",
+            justifyContent: "flex-end",
             gap: 2,
           }}
         >
@@ -423,7 +437,7 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
             Cancel
           </Button>
           <Button variant="contained" color="primary" type="submit">
-            {branch ? 'Update Branch' : 'Create Branch'}
+            {branch ? "Update Branch" : "Create Branch"}
           </Button>
         </Box>
       </Box>

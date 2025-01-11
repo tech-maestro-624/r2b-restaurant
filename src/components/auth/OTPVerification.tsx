@@ -1,3 +1,4 @@
+// OTPVerification.tsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -20,8 +21,18 @@ export default function OTPVerification() {
   const phoneNumber = localStorage.getItem('phoneNumber');
 
   useEffect(() => {
+    // If there's no phone number in localStorage, redirect to login
     if (!phoneNumber) {
       navigate('/login');
+      return;
+    }
+    
+    // Check if OTP was saved from the login response
+    const autoFillOTP = localStorage.getItem('autoFillOTP');
+    if (autoFillOTP) {
+      setOtp(autoFillOTP);
+      // Optionally remove it after setting, so it’s not reused on refresh
+      localStorage.removeItem('autoFillOTP');
     }
   }, [phoneNumber, navigate]);
 

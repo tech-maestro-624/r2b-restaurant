@@ -8,12 +8,16 @@ interface OrderFilterBarProps {
 
 export default function OrderFilterBar({ filters, onFilterChange }: OrderFilterBarProps) {
   const orderStatuses: OrderStatus[] = [
-    'pending',
-    'confirmed',
-    'preparing',
-    'ready',
-    'delivered',
-    'cancelled'
+    'Placed',
+    'Confirmed',
+    'Preparing',
+    'Prepared',
+    'Picked Up',
+    'Delivered',
+    'Cancelled',
+    'Ready to Pickup',
+    'Out For Delivery',
+    'Refunded'
   ];
 
   const paymentStatuses: PaymentStatus[] = [
@@ -40,7 +44,7 @@ export default function OrderFilterBar({ filters, onFilterChange }: OrderFilterB
                 <MenuItem value="">All</MenuItem>
                 {orderStatuses.map(status => (
                   <MenuItem key={status} value={status}>
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                    {status?.charAt(0).toUpperCase() + status.slice(1)}
                   </MenuItem>
                 ))}
               </Select>

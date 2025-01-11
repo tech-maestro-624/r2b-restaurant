@@ -1,3 +1,4 @@
+// AuthContext.tsx (excerpt)
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { enqueueSnackbar } from 'notistack';
@@ -50,8 +51,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (phoneNumber: string) => {
     try {
-      await authService.login(phoneNumber);
+      // Assume the API might return an object like { data: { otp: '123456' } }
+      const { data } = await authService.login(phoneNumber);
+      
+      // If the API returns an otp (for dev or test env), store it in localStorage
+      if (data.otp) {
+        localStorage.setItem('autoFillOTP', data.otp);
+      }
+      
+      // Store the phone number so we can retrieve it on the OTP page
       localStorage.setItem('phoneNumber', phoneNumber);
+
       navigate('/verify-otp');
       enqueueSnackbar('OTP sent successfully', { 
         variant: 'success',

@@ -23,7 +23,7 @@ export default function OrderCard({ order, onViewDetails, onStatusChange }: Orde
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
           <Typography variant="h6">
-            #{order.orderNumber}
+            #{order?.orderId}
           </Typography>
           <IconButton
             size="small"
@@ -35,8 +35,8 @@ export default function OrderCard({ order, onViewDetails, onStatusChange }: Orde
 
         <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
           <Chip
-            label={order.paymentStatus}
-            color={order.paymentStatus === 'paid' ? 'success' : 'warning'}
+            label={order?.paymentStatus}
+            color={order?.paymentStatus === 'paid' ? 'success' : 'warning'}
             size="small"
           />
           <Chip
@@ -47,19 +47,19 @@ export default function OrderCard({ order, onViewDetails, onStatusChange }: Orde
         </Stack>
 
         <Typography variant="body2" color="text.secondary" gutterBottom>
-          Customer: {order.customer.name}
+          Customer: {order?.customer?.name}
         </Typography>
         <Typography variant="body2" color="text.secondary" gutterBottom>
-          Phone: {order.customer.phoneNumber}
+          Phone: {order?.customer?.phoneNumber}
         </Typography>
         <Typography variant="body2" color="text.secondary" gutterBottom>
           Items: {order.items.length}
         </Typography>
         <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
-          Total: ₹ {order.grandTotal}
+          Total: ₹ {(order?.grandTotal).toFixed(2)}
         </Typography>
         <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-          {format(new Date(order.createdAt), 'PPp')}
+          {format(new Date(order?.createdAt), 'PPp')}
         </Typography>
 
         {/* Container Box with relative positioning */}
@@ -73,10 +73,16 @@ export default function OrderCard({ order, onViewDetails, onStatusChange }: Orde
                 label="Status"
               >
 
-<MenuItem value="Placed">Placed</MenuItem>
-                <MenuItem value="order_accepted">Order Accepted</MenuItem>
-                <MenuItem value="prepared">Prepared</MenuItem>
-                <MenuItem value="order_pickedup">Order Picked Up</MenuItem>
+          <MenuItem value="Placed">Placed</MenuItem>
+                <MenuItem value="Confirmed">Order Accepted</MenuItem>
+                <MenuItem value="Preparing">Preparing</MenuItem>
+                <MenuItem value="Prepared">Order Prepared</MenuItem>
+                <MenuItem value="Picked Up">Picked Up</MenuItem>
+                <MenuItem value="Delivered">Delivered</MenuItem>
+                <MenuItem value="Cancelled">Cancelled</MenuItem>
+                <MenuItem value="Ready to Pickup">Ready to Pickup</MenuItem>
+                <MenuItem value="Out For Delivery">Out For Delivery</MenuItem>
+                <MenuItem value="Refunded">Refunded</MenuItem>
               </Select>
             </FormControl>
           </Box>

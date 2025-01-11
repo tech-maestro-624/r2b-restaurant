@@ -18,15 +18,36 @@ export interface ICoupon {
 }
 
 export const Coupons = {
-    getAll: async (): Promise<ICoupon[]> => {
+    getAll: async (
+        page: number = 1,
+        limit: number = 10,
+    ): Promise<ICoupon[]> => {
         try {
-            const response = await api.get<ICoupon[]>('/coupon');
+            // Construct the query parameters
+            const params: any = {
+                page,
+                limit,
+            };
+            const branch = JSON.parse(localStorage.getItem('selected_branch') || '{}');
+
+            // If branch and restaurant ID are provided, add them to the condition
+            if (branch?.restaurant?._id) {
+                params.condition = { branches:  {$in : [branch._id]} };
+            }
+
+            // Make the API request with the correct type for the response
+            console.log(params);
+            
+            const response = await api.get<{ coupons: ICoupon[] }>('/coupon', { params });
+
+            // Return the coupons array from the response data
             return response.data.coupons;
         } catch (error) {
             console.error("Error fetching coupons:", error);
             throw error;
         }
     },
+
 
     getById: async (id: string): Promise<ICoupon> => {
         try {

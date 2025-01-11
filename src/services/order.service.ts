@@ -9,14 +9,15 @@ interface OrdersResponse {
 }
 
 export const orderService = {
-  getAll: (branchId: string, filters?: OrderFilterParams, page = 1, limit = 10) =>
-    api.get<OrdersResponse>(`/orders/${branchId}`, {
-      params: {
+  getAll: (branchId: string, filters?: OrderFilterParams, page = 1, limit = 10) =>{
+    console.log(filters);
+    
+  return  api.get<OrdersResponse>(`/orders/${branchId}`, {
+      params: {  page,
+        limit,condition : {
         ...filters,
-        page,
-        limit,
-      },
-    }),
+      }},
+    })},
 
   getById: ( orderId: string) =>
     api.get<Order>(`/order/${orderId}`),

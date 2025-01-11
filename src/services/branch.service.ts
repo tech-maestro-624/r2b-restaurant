@@ -33,8 +33,6 @@ export const branchService = {
     api.post<Branch>('/branch', updated)},
   
   update: (id: string, data: Partial<CreateBranchDto>) =>{
-    console.log(id, data);
-    
     api.put<Branch>(`/branch/${id}`, data)},
   
   delete: (id: string) =>
