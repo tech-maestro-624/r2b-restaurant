@@ -16,7 +16,9 @@ export default function BranchSelector() {
   
   const { data: branchData, isError } = useQuery({
     queryKey: ['branches'],
-    queryFn: () => branchService.getAll().then(res => res.data),
+    queryFn: () => branchService.getAll().then(res => {
+      return res.data;
+    }),
     onSuccess: (data) => {
       // Auto-select first branch if none selected
       if (!selectedBranch && data.branches.length > 0) {

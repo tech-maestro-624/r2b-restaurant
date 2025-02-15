@@ -239,7 +239,7 @@ export default function MenuList() {
       <Dialog
         open={openForm}
         onClose={handleCloseForm}
-        maxWidth="sm"
+        maxWidth="lg"
         fullWidth
       >
         <MenuForm

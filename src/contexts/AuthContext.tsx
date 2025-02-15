@@ -1,4 +1,3 @@
-// AuthContext.tsx (excerpt)
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { enqueueSnackbar } from 'notistack';
@@ -8,11 +7,12 @@ import { handleApiError, isNetworkError, isAuthError } from '../utils/error-hand
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-const STORAGE_KEY = 'restaurant_admin_user';
+const USER_STORAGE_KEY = 'restaurant_admin_user';
+const TOKEN_STORAGE_KEY = 'authToken';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(() => {
-    const storedUser = localStorage.getItem(STORAGE_KEY);
+    const storedUser = localStorage.getItem(USER_STORAGE_KEY);
     return storedUser ? JSON.parse(storedUser) : null;
   });
   const [loading, setLoading] = useState(true);
@@ -21,52 +21,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
+      const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       try {
         const { data } = await authService.checkAuth();
         setUser(data.user);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data.user));
-        
-        // If on login/verify-otp page and authenticated, redirect to dashboard
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
+
+        // Redirect if authenticated but on login/verify-otp page
         if (['/login', '/verify-otp'].includes(location.pathname)) {
           navigate('/dashboard');
         }
       } catch (error) {
-        // Only clear user if there's an actual auth error
         if (isAuthError(error)) {
-          setUser(null);
-          localStorage.removeItem(STORAGE_KEY);
+          logout(); // Automatically handle invalid tokens
         }
       } finally {
         setLoading(false);
       }
     };
 
-    // Only check auth if we have a stored user
-    if (localStorage.getItem(STORAGE_KEY)) {
-      checkAuth();
-    } else {
-      setLoading(false);
-    }
+    checkAuth();
   }, [navigate, location.pathname]);
 
   const login = async (phoneNumber: string) => {
     try {
-      // Assume the API might return an object like { data: { otp: '123456' } }
       const { data } = await authService.login(phoneNumber);
-      
-      // If the API returns an otp (for dev or test env), store it in localStorage
       if (data.otp) {
         localStorage.setItem('autoFillOTP', data.otp);
       }
-      
-      // Store the phone number so we can retrieve it on the OTP page
       localStorage.setItem('phoneNumber', phoneNumber);
 
       navigate('/verify-otp');
-      enqueueSnackbar('OTP sent successfully', { 
-        variant: 'success',
-        preventDuplicate: true,
-      });
+      enqueueSnackbar('OTP sent successfully', { variant: 'success', preventDuplicate: true });
     } catch (error) {
       if (isNetworkError(error)) {
         enqueueSnackbar('Unable to connect to the server. Please check your internet connection.', {
@@ -84,35 +75,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { data } = await authService.verifyOTP(otp, phoneNumber);
       localStorage.removeItem('phoneNumber');
+      localStorage.setItem(TOKEN_STORAGE_KEY, data.token); // Save the token
       setUser(data.user);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data.user));
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
       navigate('/dashboard');
-      enqueueSnackbar('Login successful', { 
-        variant: 'success',
-        preventDuplicate: true,
-      });
+      enqueueSnackbar('Login successful', { variant: 'success', preventDuplicate: true });
     } catch (error) {
       handleApiError(error, 'Invalid OTP');
       throw error;
     }
   };
 
-  const logout = async () => {
+  const logout = () => {
     try {
-      await authService.logout();
-      setUser(null);
-      localStorage.removeItem(STORAGE_KEY);
-      navigate('/login');
-      enqueueSnackbar('Logged out successfully', { 
-        variant: 'success',
-        preventDuplicate: true,
-      });
+      // Perform logout API call
+      authService.logout();
     } catch (error) {
       handleApiError(error, 'Logout failed');
-      // Force logout on client side even if API call fails
+    } finally {
+      // Clear user data and token
       setUser(null);
-      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(USER_STORAGE_KEY);
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
       navigate('/login');
+      enqueueSnackbar('Logged out successfully', { variant: 'success', preventDuplicate: true });
     }
   };
 
