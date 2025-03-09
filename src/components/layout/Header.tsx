@@ -13,6 +13,7 @@ import {
 import { Menu as MenuIcon, User, Bell } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import BranchSelector from './BranchSelector';
+import { Slide, toast, ToastContainer } from 'react-toastify';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -36,7 +37,19 @@ export default function Header({ onMenuClick }: HeaderProps) {
     handleClose();
     logout();
   };
-
+const notifyalert = ()=>{
+  toast.warn('No Notifications!', {
+    position: "top-center",
+    autoClose: 3000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "light",
+    transition: Slide,
+    });
+}
   return (
     <AppBar 
       position="fixed" 
@@ -68,7 +81,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <IconButton color="inherit" aria-label="notifications">
-            <Bell size={20} />
+            <Bell size={20} onClick={notifyalert} />
+            <ToastContainer />
           </IconButton>
           
           <IconButton

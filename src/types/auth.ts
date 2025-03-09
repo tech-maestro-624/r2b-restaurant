@@ -11,4 +11,5 @@ export interface AuthContextType {
   login: (phoneNumber: string) => Promise<void>;
   verifyOTP: (otp: string, phoneNumber: string) => Promise<void>;
   logout: () => void;
+  refreshToken: () => Promise<string>;
 }

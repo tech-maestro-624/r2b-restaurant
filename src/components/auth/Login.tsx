@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { TextField, Button, Paper, Typography, Box } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
-
+import Restaurant from '../../assets/Restaurant.png'
 export default function Login() {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,9 +24,11 @@ export default function Login() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        bgcolor: 'background.default',
+        bgcolor: '#00141B',
+        gap:'20vh'
       }}
     >
+      <img src={Restaurant} alt="Example Image" />
       <Paper
         elevation={3}
         sx={{
@@ -34,6 +36,10 @@ export default function Login() {
           width: '100%',
           maxWidth: 400,
           mx: 2,
+          backgroundColor:'#00141B',
+          color:'white',
+          
+          border:'1px solid white',   
         }}
       >
         <Typography variant="h5" component="h1" gutterBottom textAlign="center">
@@ -49,6 +55,7 @@ export default function Login() {
             margin="normal"
             required
             type="tel"
+            sx={{backgroundColor:'white'}}
           />
           <Button
             fullWidth

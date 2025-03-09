@@ -19,6 +19,7 @@ import {
   XCircle,
   Clock,
   Calendar,
+  IndianRupeeIcon,
 } from 'lucide-react';
 
 import { branchService } from '../services/branch.service';
@@ -29,15 +30,17 @@ import DateRangeDialog from './Dialog/filterDialog';
 import TopUpDialog from './Dialog/topUpDialog';
 import { PaymentService } from '../services/payment.service';
 import { TopupService } from '../services/topup.service';
+import { useNavigate } from 'react-router-dom';
 
 interface StatCardProps {
   title: string;
   value: string;
   icon: React.ReactNode;
   color: string;
+  onClick?: () => void;
 }
 
-function StatCard({ title, value, icon, color }: StatCardProps) {
+function StatCard({ title, value, icon, color,onClick }: StatCardProps) {
   return (
     <Paper
       sx={{
@@ -46,6 +49,7 @@ function StatCard({ title, value, icon, color }: StatCardProps) {
         alignItems: 'center',
         gap: 2,
       }}
+      onClick={onClick}
     >
       <Box
         sx={{
@@ -138,7 +142,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState<BranchStats | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
+  const navigate = useNavigate();
   const subscriptionStatus: IRestaurantSubscriptionStatus = {
     _id: 'abcdef123456',
     branch: 'Branch001',
@@ -174,10 +178,10 @@ export default function Dashboard() {
   // Feedback States
   const [updatingConfig, setUpdatingConfig] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [subscription, setSubscription] = useState([])
+  const [subscription, setSubscription] = useState<IRestaurantSubscriptionStatus | null>(null)
 
   const fetchStats = async (start: string, end: string) => {
-    if (!selectedBranch?._id) {
+    if (!selectedBranch || !selectedBranch._id) {
       setError('No branch selected.');
       setLoading(false);
       return;
@@ -197,10 +201,12 @@ export default function Dashboard() {
 
     setLoading(true);
     try {
-      const response = await branchService.getStats(selectedBranch._id, {
-        startDate: start,
-        endDate: end,
-      });
+      const response = await branchService.getStats(selectedBranch._id
+      //   , {
+      //   startDate: start,
+      //   endDate: end,
+      // }
+    );
       setStats(response.data); // Set stats from API response
       setError(null);
 
@@ -385,7 +391,7 @@ export default function Dashboard() {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           }),
-          icon: <DollarSign />,
+          icon: <IndianRupeeIcon />,
           color: '#2196f3',
         },
         {
@@ -396,6 +402,7 @@ export default function Dashboard() {
           }),
           icon: <ShoppingBag />,
           color: '#4caf50',
+          onClick:()=>navigate('/orders')
         },
         {
           title: 'Delivered Orders',
@@ -432,7 +439,7 @@ export default function Dashboard() {
                 maximumFractionDigits: 2,
               })
             : '0.00',
-          icon: <DollarSign />,
+          icon: <IndianRupeeIcon />,
           color: '#2196f3',
         },
         {
@@ -443,13 +450,14 @@ export default function Dashboard() {
                 maximumFractionDigits: 2,
               })
             : '0.00',
-          icon: <DollarSign />,
+          icon: <IndianRupeeIcon />,
           color: '#2196f3',
         },
       ]
     : [];
 
   const { icon, color, label } = getStatusIconAndColor(
+    
     subscription?.status
   );
 
@@ -532,15 +540,15 @@ export default function Dashboard() {
                 <strong>Branch:</strong> {subscription?.branch?.name}
               </Typography>
               <Typography variant="body1" sx={{ mb: 1 }}>
-                <strong>Subscription:</strong> {subscription?.subscription?.planName}
+                <strong>Subscription:</strong> {subscription?.subscription}
               </Typography>
               <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>Start Date:</strong>{' '}
-                {new Date(subscription?.startDate).toLocaleDateString()}
+                {new Date(subscription?.startDate ?? '').toLocaleDateString()}
               </Typography>
               <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>End Date:</strong>{' '}
-                {new Date(subscription?.endDate).toLocaleDateString()}
+                {new Date(subscription?.endDate ?? '').toLocaleDateString()}
               </Typography>
               <Typography variant="body1" sx={{ mb: 1 }}>
                 <strong>Order Credits:</strong> {subscription?.orderCount}

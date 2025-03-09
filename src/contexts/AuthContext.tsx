@@ -23,20 +23,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const checkAuth = async () => {
       const token = localStorage.getItem(TOKEN_STORAGE_KEY);
       if (!token) {
+        console.log('No token found, setting loading to false');
         setLoading(false);
         return;
       }
-
+  
       try {
         const { data } = await authService.checkAuth();
+        console.log('Auth check successful:', data);
         setUser(data.user);
         localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
-
+  
         // Redirect if authenticated but on login/verify-otp page
         if (['/login', '/verify-otp'].includes(location.pathname)) {
           navigate('/dashboard');
         }
       } catch (error) {
+        console.error('Auth check failed:', error);
         if (isAuthError(error)) {
           logout(); // Automatically handle invalid tokens
         }
@@ -44,7 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
       }
     };
-
+  
     checkAuth();
   }, [navigate, location.pathname]);
 
@@ -74,6 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const verifyOTP = async (otp: string, phoneNumber: string) => {
     try {
       const { data } = await authService.verifyOTP(otp, phoneNumber);
+      console.log(data);
       localStorage.removeItem('phoneNumber');
       localStorage.setItem(TOKEN_STORAGE_KEY, data.token); // Save the token
       setUser(data.user);

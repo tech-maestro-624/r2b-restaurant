@@ -1,18 +1,28 @@
 import axios from 'axios';
-import { handleApiError } from './error-handler';
 
 const api = axios.create({
-  baseURL: 'http://localhost:4000/api',
+  baseURL: 'http://192.168.1.102:4000/api',
   // baseURL : 'https://r2bserver.azurewebsites.net/api',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
     'Cache-Control': 'no-cache',
     // 'ngrok-skip-browser-warning': 'true',
-    Authorization: `Bearer ${localStorage.getItem('authToken')}`,
   },
   timeout: 15000, // Increased timeout
 });
+
+// Request interceptor to dynamically set the Authorization header
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
 // Response interceptor
 // api.interceptors.response.use(
 //   (response) => response,

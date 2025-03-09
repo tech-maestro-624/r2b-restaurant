@@ -36,7 +36,7 @@ export const branchService = {
     api.put<Branch>(`/branch/${id}`, data)},
   
   delete: (id: string) =>
-    api.delete(`/branches/${id}`),
+    api.delete(`/branch/${id}`),
 
   getStats: (id: string) => {
     console.log(id);
