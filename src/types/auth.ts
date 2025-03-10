@@ -1,8 +1,9 @@
 export interface User {
-  id: string;
   name: string;
+  _id: string;
   email: string;
-  role: string;
+  avatarUrl: string;
+  phoneNumber: string;
 }
 
 export interface AuthContextType {
@@ -11,5 +12,4 @@ export interface AuthContextType {
   login: (phoneNumber: string) => Promise<void>;
   verifyOTP: (otp: string, phoneNumber: string) => Promise<void>;
   logout: () => void;
-  refreshToken: () => Promise<string>;
 }

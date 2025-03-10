@@ -29,12 +29,13 @@ export default function BranchList() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const queryClient = useQueryClient();
+
   // Fetch branches with pagination
   const { data: branchData, isLoading } = useQuery({
     queryKey: ['branches', page],
     queryFn: () => branchService.getAll(page).then((res) => res.data),
   });
-  
+
   // Mutation for creating a branch
   const createBranchMutation = useMutation({
     mutationFn: (newBranch) => branchService.create(newBranch),
@@ -55,6 +56,7 @@ export default function BranchList() {
     },
     onError: (error) => handleApiError(error, 'Failed to update branch'),
   });
+
   // Mutation for deleting a branch
   const deleteMutation = useMutation({
     mutationFn: (id: string) => branchService.delete(id),
@@ -84,6 +86,7 @@ export default function BranchList() {
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
   };
+
   // Handle form submission for both create and update
   const handleFormSubmit = (processedData) => {
     if (selectedBranch) {
@@ -129,6 +132,7 @@ export default function BranchList() {
       </Box>
     );
   }
+
   return (
     <Box>
       <PageHeader
@@ -140,10 +144,10 @@ export default function BranchList() {
       <Grid container spacing={3}>
         {branchData?.branches.map((branch) => (
           <Grid item xs={12} sm={6} md={4} key={branch._id}>
-            <Card>
+            <Card sx={{ bgcolor: '#2A2D32', color: 'white' }}>
               <CardContent>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                  <Typography variant="h6" component="div">
+                  <Typography variant="h6" component="div" sx={{ color: 'white', fontSize: '1.5rem' }}>
                     {branch.name}
                   </Typography>
                   <Chip
@@ -155,14 +159,14 @@ export default function BranchList() {
 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                   <MapPin size={16} />
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" color="white" sx={{ fontSize: '1rem' }}>
                     {branch.address}
                   </Typography>
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                   <Phone size={16} />
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" color="white" sx={{ fontSize: '1rem' }}>
                     {branch.phoneNumber}
                   </Typography>
                 </Box>

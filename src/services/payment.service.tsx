@@ -1,9 +1,12 @@
 import api from "../utils/axios";
 
 export const PaymentService = {
-    verifyPayment: (data:Object) =>{
-        console.log(data);
-        
-       return api.post('/subscription-topup-verify', data)
-    }
-}
+    verifyPayment: (paymentData: any, endpoint: string = '/subscription-topup-verify') => {
+      const token = localStorage.getItem('authToken');
+      return api.post(endpoint, paymentData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+    },
+  };

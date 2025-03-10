@@ -1,5 +1,17 @@
 import { useState } from 'react';
-import { Box, Card, CardContent, Typography, IconButton, Stack, Chip, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
+import { 
+  Box, 
+  Card, 
+  CardContent, 
+  Typography, 
+  IconButton, 
+  Stack, 
+  Chip, 
+  MenuItem, 
+  Select, 
+  FormControl, 
+  InputLabel 
+} from '@mui/material';
 import { Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { Order } from '../../../types/order';
@@ -18,18 +30,21 @@ export default function OrderCard({ order, onViewDetails, onStatusChange }: Orde
     setStatus(newStatus);
     onStatusChange(order._id, newStatus);
   };
+
   return (
-    <Card>
+    <Card sx={{ 
+      backgroundColor: '#2A2D32', 
+      color: 'white',
+      fontSize: '1.1rem',
+      borderRadius: '12px' // Added border radius
+    }}>
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="h6">
+          <Typography variant="h6" sx={{ fontSize: '1.5rem' }}>
             #{order?.orderId}
           </Typography>
-          <IconButton
-            size="small"
-            onClick={() => onViewDetails(order)}
-          >
-            <Eye size={20} />
+          <IconButton size="small" onClick={() => onViewDetails(order)}>
+            <Eye size={20} color="white" />
           </IconButton>
         </Box>
 
@@ -46,34 +61,48 @@ export default function OrderCard({ order, onViewDetails, onStatusChange }: Orde
           />
         </Stack>
 
-        <Typography variant="body2" color="text.secondary" gutterBottom>
+        <Typography variant="body2" sx={{ color: 'white', fontSize: '1.1rem' }} gutterBottom>
           Customer: {order?.customer?.name}
         </Typography>
-        <Typography variant="body2" color="text.secondary" gutterBottom>
+        <Typography variant="body2" sx={{ color: 'white', fontSize: '1.1rem' }} gutterBottom>
           Phone: {order?.customer?.phoneNumber}
         </Typography>
-        <Typography variant="body2" color="text.secondary" gutterBottom>
+        <Typography variant="body2" sx={{ color: 'white', fontSize: '1.1rem' }} gutterBottom>
           Items: {order.items.length}
         </Typography>
-        <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
+        <Typography variant="h6" sx={{ mt: 1, color: 'white', fontSize: '1.3rem' }}>
           Total: ₹ {(order?.grandTotal).toFixed(2)}
         </Typography>
-        <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+        <Typography variant="caption" display="block" sx={{ mt: 1, color: 'white', fontSize: '0.9rem' }}>
           {format(new Date(order?.createdAt), 'PPp')}
         </Typography>
 
-        {/* Container Box with relative positioning */}
         <Box sx={{ position: 'relative', mt: 2 }}>
           <Box sx={{ position: 'absolute', bottom: 0, right: 0, width: '50%' }}>
             <FormControl fullWidth size="small">
-              <InputLabel>Status</InputLabel>
+              <InputLabel sx={{ color: 'white', fontSize: '1.1rem' }}>Status</InputLabel>
               <Select
                 value={status}
                 onChange={handleStatusChange}
                 label="Status"
+                sx={{
+                  color: 'white',
+                  fontSize: '1.1rem',
+                  '.MuiSvgIcon-root': {
+                    color: 'white',
+                  },
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'white',
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'white',
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: 'white',
+                  },
+                }}
               >
-
-          <MenuItem value="Placed">Placed</MenuItem>
+                <MenuItem value="Placed">Placed</MenuItem>
                 <MenuItem value="Confirmed">Order Accepted</MenuItem>
                 <MenuItem value="Preparing">Preparing</MenuItem>
                 <MenuItem value="Prepared">Order Prepared</MenuItem>

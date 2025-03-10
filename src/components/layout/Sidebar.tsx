@@ -18,7 +18,6 @@ import {
   ShoppingBag,
   ChevronDown,
   ChevronRight,
-  Settings,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -35,21 +34,17 @@ export default function Sidebar({ open, onClose, variant }: SidebarProps) {
   const [menuOpen, setMenuOpen] = useState(true);
 
   const menuItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
+    { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} color="#4caf50" /> },
     {
       label: 'Restaurant',
-      icon: <Store size={20} />,
+      icon: <Store size={20} color="#ff9800" />,
       children: [
-        // { path: '/restaurants', label: 'Restaurants', icon: <Store size={20} /> },
-        { path: '/branches', label: 'Branches', icon: <Map size={20} /> },
+        { path: '/branches', label: 'Branches', icon: <Map size={20} color="#2196f3" /> },
       ],
     },
-    { path: '/menu', label: 'Menu', icon: <MenuIcon size={20} /> },
-    { path: '/orders', label: 'Orders', icon: <ShoppingBag size={20} /> },
-    { path: '/coupons', label: 'Coupons', icon: <ShoppingBag size={20} /> },
-
-    // { path: '/customers', label: 'Customers', icon: <Users size={20} /> },
-    { path: '/settings', label: 'Settings', icon: <Settings size={20} /> },
+    { path: '/menu', label: 'Menu', icon: <MenuIcon size={20} color="#f44336" /> },
+    { path: '/orders', label: 'Orders', icon: <ShoppingBag size={20} color="#9c27b0" /> },
+    { path: '/coupons', label: 'Coupons', icon: <ShoppingBag size={20} color="#3f51b5" /> },
   ];
 
   const handleNavigation = (path: string) => {
@@ -60,27 +55,43 @@ export default function Sidebar({ open, onClose, variant }: SidebarProps) {
   };
 
   const drawer = (
-    <Box sx={{ mt: 1 }}>
+    <Box sx={{ mt: 1, bgcolor: '#0F1215', color: 'white' }}>
       <List>
         {menuItems.map((item) =>
           item.children ? (
             <Box key={item.label}>
-              <ListItemButton onClick={() => setMenuOpen(!menuOpen)}>
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.label} />
-                {menuOpen ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
+              <ListItemButton
+                onClick={() => setMenuOpen(!menuOpen)}
+                sx={{
+                  '&:hover': {
+                    backgroundColor: '#1c1f23',
+                  },
+                }}
+              >
+                <ListItemIcon sx={{ color: item.icon.props.color, '&:hover': { color: '#ffffff' } }}>
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText primary={item.label} sx={{ color: 'white' }} />
+                {menuOpen ? <ChevronDown size={20} color="white" /> : <ChevronRight size={20} color="white" />}
               </ListItemButton>
               <Collapse in={menuOpen} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
                   {item.children.map((child) => (
                     <ListItemButton
                       key={child.path}
-                      sx={{ pl: 4 }}
+                      sx={{
+                        pl: 4,
+                        '&:hover': {
+                          backgroundColor: '#1c1f23',
+                        },
+                      }}
                       selected={location.pathname === child.path}
                       onClick={() => handleNavigation(child.path)}
                     >
-                      <ListItemIcon>{child.icon}</ListItemIcon>
-                      <ListItemText primary={child.label} />
+                      <ListItemIcon sx={{ color: child.icon.props.color, '&:hover': { color: '#ffffff' } }}>
+                        {child.icon}
+                      </ListItemIcon>
+                      <ListItemText primary={child.label} sx={{ color: 'white' }} />
                     </ListItemButton>
                   ))}
                 </List>
@@ -91,9 +102,16 @@ export default function Sidebar({ open, onClose, variant }: SidebarProps) {
               <ListItemButton
                 selected={location.pathname === item.path}
                 onClick={() => handleNavigation(item.path)}
+                sx={{
+                  '&:hover': {
+                    backgroundColor: '#1c1f23',
+                  },
+                }}
               >
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.label} />
+                <ListItemIcon sx={{ color: item.icon.props.color, '&:hover': { color: '#ffffff' } }}>
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText primary={item.label} sx={{ color: 'white' }} />
               </ListItemButton>
             </ListItem>
           )
@@ -115,6 +133,7 @@ export default function Sidebar({ open, onClose, variant }: SidebarProps) {
           boxSizing: 'border-box',
           mt: '64px',
           height: 'calc(100% - 64px)',
+          backgroundColor: '#0F1215',
         },
       }}
     >

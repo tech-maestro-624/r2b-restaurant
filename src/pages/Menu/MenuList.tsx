@@ -55,7 +55,7 @@ function MenuItemCard({
   };
 
   return (
-    <Card>
+    <Card sx={{ bgcolor: '#2A2D32', color: 'white', border: '1px solid rgba(255, 255, 255, 0.1)', boxShadow: '0 0 5px rgba(255, 255, 255, 0.1)' }}>
       {imageId ? (
         imageLoading ? (
           <Skeleton variant="rectangular" width="100%" height={140} />
@@ -87,7 +87,7 @@ function MenuItemCard({
             ₹{item.price}
           </Typography>
         </Box>
-        <Typography color="text.secondary" sx={{ mb: 2 }}>
+        <Typography sx={{ mb: 2, color: 'white' }}>
           {item.description}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>

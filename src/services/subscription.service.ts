@@ -1,16 +1,52 @@
-import axios from 'axios';
+// src/services/subscription.service.ts
+import api from '../utils/axios';
 
-const API_URL = 'http://192.168.1.102:4000/api';
-
-const SubscriptionService = {
+export const SubscriptionService = {
   getSubscriptionStatus: (branchId: string) => {
     const token = localStorage.getItem('authToken');
-    return axios.get(`${API_URL}/subscription-status?condition=${branchId}`, {
+    return api.get(`/subscription-status?branchId=${branchId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
   },
+  updateSubscription: (subscriptionId: string, data: any) => {
+    const token = localStorage.getItem('authToken');
+    return api.put(`/subscription/${subscriptionId}`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  },
+  getAllSubscriptions: () => {
+    const token = localStorage.getItem('authToken');
+    return api.get(`/subscriptions`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  },
+  renewSubscription: (branchId: string, amount: number) => {
+    const token = localStorage.getItem('authToken');
+    return api.post('/renew', { branchId, amount }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  },
+  upgradeSubscription: (branchId: string, newSubscriptionId: string, amount: number) => {
+    const token = localStorage.getItem('authToken');
+    return api.post('/subscription/upgrade', 
+      { 
+        branchId, 
+        newSubscriptionId,
+        amount 
+      }, 
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+  }
 };
-
-export { SubscriptionService };

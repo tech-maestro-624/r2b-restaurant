@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const verifyOTP = async (otp: string, phoneNumber: string) => {
     try {
-      const { data } = await authService.verifyOTP(otp, phoneNumber);
+      const {data}: any = await authService.verifyOTP(otp, phoneNumber);
       console.log(data);
       localStorage.removeItem('phoneNumber');
       localStorage.setItem(TOKEN_STORAGE_KEY, data.token); // Save the token

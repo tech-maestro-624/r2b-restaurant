@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://192.168.1.102:4000/api',
+  baseURL: 'http://192.168.1.109:4000/api',
   // baseURL : 'https://r2bserver.azurewebsites.net/api',
   headers: {
     'Content-Type': 'application/json',

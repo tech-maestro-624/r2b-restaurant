@@ -19,8 +19,8 @@ export default function OrderList() {
 
   const { data: orderData, isLoading } = useQuery({
     queryKey: ['orders', selectedBranch?._id, filters, page],
-    queryFn: () => 
-      selectedBranch 
+    queryFn: () =>
+      selectedBranch
         ? orderService.getAll(selectedBranch._id, filters, page).then((res) => res.data)
         : Promise.resolve(null),
     enabled: !!selectedBranch,
@@ -40,9 +40,7 @@ export default function OrderList() {
   if (!selectedBranch) {
     return (
       <Box sx={{ mt: 2 }}>
-        <Alert severity="info">
-          Please select a branch to view orders
-        </Alert>
+        <Alert severity="info">Please select a branch to view orders</Alert>
       </Box>
     );
   }
@@ -52,7 +50,6 @@ export default function OrderList() {
   const handleStatusChange = (orderId: string, status: Order['status']) => {
     updateStatusMutation.mutate({ orderId, status });
   };
-  
 
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
@@ -64,10 +61,7 @@ export default function OrderList() {
         Orders - {selectedBranch?.name}
       </Typography>
 
-      <OrderFilterBar 
-        filters={filters} 
-        onFilterChange={setFilters} 
-      />
+      <OrderFilterBar filters={filters} onFilterChange={setFilters} />
 
       {orderData?.orders.length === 0 ? (
         <Alert severity="info" sx={{ mt: 2 }}>
@@ -80,8 +74,8 @@ export default function OrderList() {
               <OrderCard
                 order={order}
                 onViewDetails={() => navigate(`/orders/${order._id}`)}
-                onStatusChange={handleStatusChange} // Pass the function here
-
+                onStatusChange={handleStatusChange}
+                sx={{ bgcolor: '#2A2D32', color: 'white', border: '1px solid rgba(255, 255, 255, 0.1)', boxShadow: '0 0 5px rgba(255, 255, 255, 0.1)' }}
               />
             </Grid>
           ))}

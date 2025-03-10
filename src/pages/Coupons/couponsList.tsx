@@ -178,7 +178,9 @@ export default function CouponsList() {
                     mb: 3,
                 }}
             >
-                <Typography variant="h4">Coupons</Typography>
+                <Typography variant="h4" sx={{ fontSize: '2rem' }}>
+                    Coupons
+                </Typography>
                 <Button
                     variant="contained"
                     startIcon={<Plus />}
@@ -188,7 +190,7 @@ export default function CouponsList() {
                 </Button>
             </Box>
 
-            <Paper sx={{ height: 400, width: '100%' }}>
+            <Paper sx={{ height: 400, width: '100%', bgcolor: '#2A2D32', color: 'white' }}>
                 <DataGrid
                     rows={coupons || []}
                     columns={columns}
@@ -199,7 +201,28 @@ export default function CouponsList() {
                         pagination: { paginationModel: { pageSize: 5 } },
                     }}
                     getRowId={(row) => row._id}
-
+                    sx={{
+                      '& .MuiDataGrid-cell': {
+                        color: 'white',
+                        borderRight: '2px solid rgba(255, 255, 255, 0.2)', // Highlighted vertical lines
+                        fontSize: '1.2rem', // Bigger text
+                      },
+                      '& .MuiDataGrid-columnHeaders': {
+                        backgroundColor: '#2A2D32',
+                        color: 'white',
+                        borderBottom: '2px solid rgba(255, 255, 255, 0.2)', // Highlighted bottom border for headers
+                        fontSize: '1.3rem', // Bigger text
+                      },
+                      '& .MuiDataGrid-footerContainer': {
+                        backgroundColor: '#2A2D32',
+                        color: 'white',
+                        borderTop: '2px solid rgba(255, 255, 255, 0.2)', // Highlighted top border for footer
+                        fontSize: '1.2rem', // Bigger text
+                      },
+                      '& .MuiDataGrid-columnSeparator': {
+                        display: 'none', // Hide default column separators
+                      },
+                    }}
                 />
             </Paper>
 
