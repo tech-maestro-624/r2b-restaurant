@@ -65,8 +65,8 @@ const TopUpDialog: React.FC<TopUpDialogProps> = ({
 
   return (
     <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>Top Up Orders</DialogTitle>
-      <DialogContent>
+      <DialogTitle sx={{ bgcolor: '#2A2D32', color: 'white' }}>Top Up Orders</DialogTitle>
+      <DialogContent sx={{ bgcolor: '#2A2D32', color: 'white' }}>
         <Stack direction="column" spacing={2} sx={{ mt: 1 }}>
           <Typography variant="body1">
             <strong>Per Order Value:</strong> {perOrderValue.toFixed(2)}
@@ -84,6 +84,7 @@ const TopUpDialog: React.FC<TopUpDialogProps> = ({
               step: 1,
             }}
             fullWidth
+            sx={{ input: { color: 'white' }, label: { color: 'white' } }}
           />
           <Typography variant="body1">
             <strong>Total Cost:</strong> {totalCost.toFixed(2)}
@@ -95,7 +96,7 @@ const TopUpDialog: React.FC<TopUpDialogProps> = ({
           </Typography>
         )}
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ bgcolor: '#2A2D32' }}>
         <Button onClick={handleClose} color="secondary" disabled={loading}>
           Cancel
         </Button>

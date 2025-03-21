@@ -15,7 +15,6 @@ import {
 import { Menu as MenuIcon, User, Bell } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import BranchSelector from './BranchSelector';
-import { Slide, toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
 // Add a style element to the document with !important rules
@@ -122,20 +121,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
     logout();
   };
   
-  const notifyalert = () => {
-    toast.warn('No Notifications!', {
-      position: "top-center",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "light",
-      transition: Slide,
-    });
-  };
-
   // Style object with !important flags for direct application
   const menuPaperStyle = {
     backgroundColor: '#0F1215 !important' as any,
@@ -180,20 +165,18 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
         <Box sx={{ flexGrow: 1 }} />
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <IconButton color="inherit" aria-label="notifications">
-            <Bell size={20} onClick={notifyalert} color="white" />
-            <ToastContainer />
-          </IconButton>
+       
 
-          <IconButton
-            color="inherit"
-            aria-label="account"
-            onClick={handleMenu}
-          >
-            <User size={20} color="white" />
-          </IconButton>
-        </Box>
+<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+  <IconButton
+    color="inherit"
+    aria-label="account"
+    onClick={handleMenu}
+  >
+    <User size={20} color="white" />
+  </IconButton>
+</Box>
+
 
         <ThemeProvider theme={darkMenuTheme}>
           <Menu

@@ -29,10 +29,11 @@ import { branchService } from '../services/branch.service';
 import { useBranch } from '../contexts/BranchContext';
 import { SubscriptionService } from '../services/subscription.service';
 import { ConfigurationService } from '../services/configuration.service';
-import DateRangeDialog from './Dialog/filterDialog';
+import DateRangeDialog from '../components/Dialog/filterDialog';
 
-import TopUpDialog from './Dialog/topUpDialog';
-import UpgradeDialog from './Dialog/upgradeDialog';
+import TopUpDialog from '../components/Dialog/topUpDialog';
+import UpgradeDialog from '../components/Dialog/upgradeDialog';
+import PurchaseSubscriptionDialog from '../components/Dialog/purchaseDialog';
 import { PaymentService } from '../services/payment.service';
 import { TopupService } from '../services/topup.service';
 import { useNavigate } from 'react-router-dom';
@@ -120,7 +121,7 @@ export default function Dashboard() {
   const [subLoading, setSubLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  
+  console.log(selectedBranch);
   // State declarations
   const [startDate, setStartDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [endDate, setEndDate] = useState<string>(new Date().toISOString().slice(0, 10));
@@ -137,14 +138,17 @@ export default function Dashboard() {
   const [openUpgradeDialog, setOpenUpgradeDialog] = useState<boolean>(false);
   const [upgradeError, setUpgradeError] = useState<string | null>(null);
   const [upgradingSubscription, setUpgradingSubscription] = useState<boolean>(false);
+  const [openPurchaseDialog, setOpenPurchaseDialog] = useState<boolean>(false);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  const [purchasingSubscription, setPurchasingSubscription] = useState<boolean>(false);
 
   // Calculate remaining orders and credits status
   const getRemainingOrders = () => {
     if (!activeSubscription) return 0;
     
-    // Get max orders from subscription plan
-    const maxOrders = activeSubscription.subscriptionDetails?.maxOrders || 
-                     activeSubscription.maxOrders || 100;
+    // Get max orders from subscription status if available, otherwise from plan
+    const maxOrders = activeSubscription.maxOrders || 
+                     activeSubscription.subscriptionDetails?.maxOrders || 100;
     
     // Get current used orders
     const usedOrders = activeSubscription.orderCount || 0;
@@ -156,9 +160,11 @@ export default function Dashboard() {
   const getOrderUsagePercentage = () => {
     if (!activeSubscription) return 0;
     
-    // Get max orders from subscription plan
-    const maxOrders = activeSubscription.subscriptionDetails?.maxOrders || 
-                     activeSubscription.maxOrders || 100;
+    // Get max orders from subscription status if available, otherwise from plan
+    const maxOrders = activeSubscription.maxOrders || 
+                     activeSubscription.subscriptionDetails?.maxOrders || 100;
+    
+    if (maxOrders === 0) return 0; // Avoid division by zero
     
     // Get current used orders
     const usedOrders = activeSubscription.orderCount || 0;
@@ -188,12 +194,12 @@ export default function Dashboard() {
       setLoading(false);
       return;
     }
-
     setLoading(true);
     try {
       const response = await branchService.getStats(selectedBranch._id);
-      console.log("Stats response:", response);
+      console.log("Stats response:", response.data);
       setStats(response.data);
+      // console.log(response.data);
       setError(null);
     } catch (err: any) {
       console.error("Error fetching stats:", err);
@@ -202,110 +208,186 @@ export default function Dashboard() {
       setLoading(false);
     }
   };
-  
+  console.log('stats',stats);
   // Fetch subscription data
-  const fetchSubscription = async () => {
-    if (!selectedBranch || !selectedBranch._id) {
-      console.log("No branch selected, skipping subscription fetch");
+ // Update the fetchSubscription function in Dashboard.tsx to ensure it properly reads maxOrders
+
+ const fetchSubscription = async () => {
+  if (!selectedBranch || !selectedBranch._id) {
+    console.log("No branch selected, skipping subscription fetch");
+    setActiveSubscription(null);
+    return;
+  }
+  
+  setSubLoading(true);
+  
+  try {
+    console.log(`Fetching subscription for branch: ${selectedBranch._id}`);
+    
+    // Reset the state before fetching
+    setActiveSubscription(null);
+    
+    // Fetch data from API
+    const response = await SubscriptionService.getSubscriptionStatus(selectedBranch._id);
+    console.log("API Response:", response);
+    
+    // Check if we have a valid response
+    if (!response || !response.data) {
+      console.log("No data in API response");
       setActiveSubscription(null);
+      setSubLoading(false);
       return;
     }
     
-    setSubLoading(true);
+    // Get the data array from the response
+    const subscriptions = response.data;
     
-    try {
-      console.log(`Fetching subscription for branch: ${selectedBranch._id}`);
-      
-      // Reset the state before fetching
+    // Check if we have an empty array (no subscriptions)
+    if (!Array.isArray(subscriptions) || subscriptions.length === 0) {
+      console.log("No subscriptions in API response (empty array)");
       setActiveSubscription(null);
-      
-      // Fetch data from API
-      const response = await SubscriptionService.getSubscriptionStatus(selectedBranch._id);
-      console.log("API Response:", response);
-      
-      // Check if we have a valid response
-      if (!response || !response.data) {
-        console.log("No data in API response");
-        setActiveSubscription(null);
-        setSubLoading(false);
-        return;
-      }
-      
-      // Get the data array from the response
-      const subscriptions = response.data;
-      
-      // Check if we have an empty array (no subscriptions)
-      if (!Array.isArray(subscriptions) || subscriptions.length === 0) {
-        console.log("No subscriptions in API response (empty array)");
-        setActiveSubscription(null);
-        setSubLoading(false);
-        return;
-      }
-      
-      console.log("Found subscriptions:", subscriptions.length);
-      
-      // Find the subscription that matches our branch ID
-      let foundSubscription = null;
-      
-      for (const subscription of subscriptions) {
-        console.log("Checking subscription:", subscription._id);
-        
-        // Check if branch exists and has an _id
-        if (subscription.branch && subscription.branch._id) {
-          console.log("Subscription branch ID:", subscription.branch._id);
-          
-          // Check if this subscription's branch._id matches our selectedBranchId
-          if (String(subscription.branch._id) === String(selectedBranch._id)) {
-            console.log("Found matching subscription!");
-            foundSubscription = subscription;
-            break;
-          }
-        }
-      }
-      
-      if (foundSubscription) {
-        console.log("Setting active subscription:", foundSubscription);
-        
-        // Create a transformed subscription object that maintains our expected structure
-        const transformedSubscription = {
-          _id: foundSubscription._id,
-          branch: foundSubscription.branch._id,
-          branchName: foundSubscription.branch.name,
-          subscription: foundSubscription.subscription._id,
-          subscriptionName: foundSubscription.subscription.planName,
-          startDate: foundSubscription.startDate,
-          endDate: foundSubscription.endDate,
-          orderCount: foundSubscription.orderCount,
-          price:foundSubscription.price,
-          status: foundSubscription.status,
-          branchDetails: foundSubscription.branch,
-          subscriptionDetails: foundSubscription.subscription,
-          maxOrders: foundSubscription.subscription.maxOrders || 100
-        };
-        
-        // Set the transformed subscription
-        setActiveSubscription(transformedSubscription);
-        
-        // Update date range based on subscription
-        if (foundSubscription.startDate && foundSubscription.endDate) {
-          const start = new Date(foundSubscription.startDate).toISOString().slice(0, 10);
-          const end = new Date(foundSubscription.endDate).toISOString().slice(0, 10);
-          setStartDate(start);
-          setEndDate(end);
-          setDialogStartDate(start);
-          setDialogEndDate(end);
-        }
-      } else {
-        console.log("No matching subscription found for branch", selectedBranch._id);
-        setActiveSubscription(null);
-      }
-    } catch (error) {
-      console.error("Error fetching subscription:", error);
-      setActiveSubscription(null);
-    } finally {
       setSubLoading(false);
+      return;
     }
-  };
+    
+    console.log("Total subscriptions in response:", subscriptions.length);
+    
+    // IMPORTANT: We need to make sure we're only considering subscriptions for THIS branch
+    // Convert selectedBranch._id to string for consistent comparison
+    const selectedBranchIdStr = String(selectedBranch._id).trim();
+    console.log("Current branch ID we're looking for:", selectedBranchIdStr);
+    
+    // Log all subscription branch IDs for debugging
+    subscriptions.forEach((sub, index) => {
+      let branchId = "unknown";
+      if (sub.branch) {
+        if (typeof sub.branch === 'object' && sub.branch._id) {
+          branchId = String(sub.branch._id).trim();
+        } else if (typeof sub.branch === 'string') {
+          branchId = String(sub.branch).trim();
+        }
+      }
+      console.log(`Subscription ${index} - Branch ID: ${branchId}`);
+    });
+    
+    // Filter to ONLY get subscriptions that EXACTLY match this branch
+    const matchingSubscriptions = subscriptions.filter(sub => {
+      if (!sub.branch) return false;
+      
+      let branchId = null;
+      if (typeof sub.branch === 'object' && sub.branch._id) {
+        branchId = String(sub.branch._id).trim();
+      } else if (typeof sub.branch === 'string') {
+        branchId = String(sub.branch).trim();
+      }
+      
+      const isMatch = branchId === selectedBranchIdStr;
+      console.log(`Checking branch [${branchId}] against [${selectedBranchIdStr}]: ${isMatch}`);
+      return isMatch;
+    });
+    
+    console.log(`Found ${matchingSubscriptions.length} subscriptions specifically for this branch`);
+    
+    // Find the active subscription - prioritize ones with status 'active'
+    let foundSubscription = null;
+    
+    // First try to find an active subscription
+    foundSubscription = matchingSubscriptions.find(sub => 
+      sub.status && sub.status.toLowerCase() === 'active'
+    );
+    
+    // If no active subscription, try to find any subscription with a valid date range
+    if (!foundSubscription) {
+      const now = new Date();
+      foundSubscription = matchingSubscriptions.find(sub => {
+        if (!sub.startDate || !sub.endDate) return false;
+        
+        const startDate = new Date(sub.startDate);
+        const endDate = new Date(sub.endDate);
+        return startDate <= now && endDate >= now;
+      });
+    }
+    
+    // If still no subscription found, just take the first one if it exists
+    if (!foundSubscription && matchingSubscriptions.length > 0) {
+      foundSubscription = matchingSubscriptions[0];
+    }
+    
+    // Process the found subscription if it exists
+    if (foundSubscription) {
+      // Validate that this subscription belongs to the correct branch
+      let subscriptionBranchId = null;
+      if (typeof foundSubscription.branch === 'object' && foundSubscription.branch._id) {
+        subscriptionBranchId = String(foundSubscription.branch._id).trim();
+      } else if (typeof foundSubscription.branch === 'string') {
+        subscriptionBranchId = String(foundSubscription.branch).trim();
+      }
+      
+      // Final validation check - MUST have matching branch ID
+      if (subscriptionBranchId !== selectedBranchIdStr) {
+        console.error("Branch ID mismatch in final validation! This should not happen.");
+        console.error(`Branch from subscription: ${subscriptionBranchId}`);
+        console.error(`Current selected branch: ${selectedBranchIdStr}`);
+        setActiveSubscription(null);
+        setSubLoading(false);
+        return;
+      }
+      
+      console.log("Confirmed subscription for this branch:", foundSubscription);
+      
+      // Extract subscription details safely
+      const subscriptionDetails = foundSubscription.subscription || {};
+      const branchDetails = foundSubscription.branch || {};
+      
+      // Get maxOrders with fallbacks
+      const maxOrders = foundSubscription.maxOrders || 
+                      (subscriptionDetails.maxOrders ? subscriptionDetails.maxOrders : 100);
+      
+      // Create the transformed subscription object
+      const transformedSubscription = {
+        _id: foundSubscription._id,
+        branch: typeof branchDetails === 'object' ? branchDetails._id : branchDetails,
+        branchName: typeof branchDetails === 'object' ? branchDetails.name : selectedBranch.name,
+        subscription: typeof subscriptionDetails === 'object' ? subscriptionDetails._id : subscriptionDetails,
+        subscriptionName: typeof subscriptionDetails === 'object' ? 
+                        (subscriptionDetails.planName || 'Standard Plan') : 'Standard Plan',
+        startDate: foundSubscription.startDate,
+        endDate: foundSubscription.endDate,
+        orderCount: foundSubscription.orderCount || 0,
+        price: typeof subscriptionDetails === 'object' ? 
+              (subscriptionDetails.price || 0) : (foundSubscription.price || 0),
+        status: foundSubscription.status || 'unknown',
+        branchDetails: branchDetails,
+        subscriptionDetails: subscriptionDetails,
+        maxOrders: maxOrders,
+        remainingOrders: Math.max(0, maxOrders - (foundSubscription.orderCount || 0)),
+        usagePercentage: maxOrders ? 
+          Math.min(100, Math.round(((foundSubscription.orderCount || 0) / maxOrders) * 100)) : 0
+      };
+      
+      console.log("Setting active subscription for branch:", transformedSubscription);
+      setActiveSubscription(transformedSubscription);
+      
+      // Update date range based on subscription
+      if (foundSubscription.startDate && foundSubscription.endDate) {
+        const start = new Date(foundSubscription.startDate).toISOString().slice(0, 10);
+        const end = new Date(foundSubscription.endDate).toISOString().slice(0, 10);
+        setStartDate(start);
+        setEndDate(end);
+        setDialogStartDate(start);
+        setDialogEndDate(end);
+      }
+    } else {
+      console.log("No valid subscription found for this branch after filtering");
+      setActiveSubscription(null);
+    }
+  } catch (error) {
+    console.error("Error fetching subscription:", error);
+    setActiveSubscription(null);
+  } finally {
+    setSubLoading(false);
+  }
+};
   
   // Fetch configuration
   const fetchConfiguration = async () => {
@@ -348,7 +430,7 @@ export default function Dashboard() {
   // Fetch stats when dates change
   useEffect(() => {
     if (startDate && endDate && selectedBranch) {
-      fetchStats();
+      console.log(fetchStats());
     }
   }, [startDate, endDate]);
   
@@ -437,8 +519,9 @@ export default function Dashboard() {
         additionalOrders: quantity
       });
       
-      if (response.data) {
-        openRazorpayCheckout(response.data);
+      if (response.data && response.data.razorpayOrderId) {
+        console.log("Initiating top-up payment for Razorpay order:", response.data.razorpayOrderId);
+        openRazorpayCheckout(response.data.razorpayOrderId, 'topup');
       } else {
         alert('Failed to initiate payment. Please try again.');
       }
@@ -453,95 +536,211 @@ export default function Dashboard() {
 
   const handleRenewSubscription = async () => {
     try {
+      if (!selectedBranch || !selectedBranch._id) {
+        alert('No branch selected. Please select a branch first.');
+        return;
+      }
+  
+      if (!activeSubscription) {
+        alert('No active subscription found to renew.');
+        return;
+      }
+  
       setUpdatingConfig(true);
       
+      // Log parameters for debugging
+      console.log("Renewing subscription with params:", {
+        branchId: selectedBranch._id,
+        subscriptionId: activeSubscription.subscription,
+        currentSubscriptionId: activeSubscription._id
+      });
+        
       // Calculate the price - use the subscription details if available, otherwise use the price directly
-      const price = activeSubscription.subscriptionDetails?.price || 
-                    activeSubscription.price || 
-                    0;
-                    
-      if (!price) {
-        throw new Error('Could not determine subscription price for renewal');
+      let price = 0;
+      
+      // Check all possible price locations
+      if (activeSubscription.subscriptionDetails && typeof activeSubscription.subscriptionDetails === 'object') {
+        price = parseFloat(activeSubscription.subscriptionDetails.price || 0);
+      } else if (activeSubscription.price) {
+        price = parseFloat(activeSubscription.price);
       }
       
+      console.log(`Calculated price for renewal: ${price}`);
+                    
+      if (!price || isNaN(price) || price <= 0) {
+        throw new Error('Could not determine a valid subscription price for renewal');
+      }
+      
+      // Create the payload with complete information
+      const renewalPayload = {
+        branchId: selectedBranch._id,
+        subscriptionId: activeSubscription.subscription,
+        currentSubscriptionId: activeSubscription._id,
+        price: price
+      };
+      
+      console.log("Sending renewal request with payload:", renewalPayload);
+      
+      // Call the API with complete information
       const response = await SubscriptionService.renewSubscription(
         selectedBranch._id, 
-        parseFloat(price)
+        price,
       );
       
+      console.log("Renewal API response:", response);
+      
       if (response.data && response.data.razorpayOrderId) {
+        console.log("Opening Razorpay checkout for renewal with order ID:", response.data.razorpayOrderId);
         openRazorpayCheckout(response.data.razorpayOrderId, 'renew');
       } else {
-        alert('Failed to initiate payment. Please try again.');
+        console.error("Missing razorpayOrderId in response:", response);
+        alert('Failed to initiate payment: No order ID received from server.');
       }
-    } catch (error: any) {
-      console.error("Renew error", error);
+    } catch (error:any) {
+      console.error("Renewal error:", error);
       setConfigError(`Failed to renew subscription: ${error.message || 'Unknown error'}`);
+      alert(`Failed to renew subscription: ${error.message || 'Unknown error'}`);
     } finally {
       setUpdatingConfig(false);
     }
   };
 
-  // Razorpay checkout handler
-  const openRazorpayCheckout = (razorpayOrderId: string, paymentType: 'topup' | 'renew' | 'upgrade' = 'topup') => {
-    const options: any = {
+  const handleOpenPurchaseDialog = () => {
+    setOpenPurchaseDialog(true);
+    setPurchaseError(null);
+  };
+
+  const handleClosePurchaseDialog = () => {
+    setOpenPurchaseDialog(false);
+  };
+
+  const handlePurchaseSubscription = async (subscriptionId: string, amount: number) => {
+    if (!selectedBranch || !selectedBranch._id) {
+      setPurchaseError('No branch selected');
+      return;
+    }
+    
+    setPurchasingSubscription(true);
+    
+    try {
+      console.log('Purchasing subscription:', {
+        branchId: selectedBranch._id,
+        subscriptionId,
+        amount
+      });
+      
+      const response = await SubscriptionService.purchaseSubscription(
+        selectedBranch._id,
+        subscriptionId,
+        amount
+      );
+      
+      console.log('Purchase response:', response);
+      
+      if (response.data && response.data.razorpayOrderId) {
+        openRazorpayCheckout(response.data.razorpayOrderId, 'purchase');
+      } else {
+        setPurchaseError('Failed to initiate payment. Please try again.');
+      }
+    } catch (error: any) {
+      console.error('Error purchasing subscription:', error);
+      setPurchaseError(`Failed to purchase subscription: ${error.message || 'Unknown error'}`);
+    } finally {
+      setPurchasingSubscription(false);
+    }
+  };
+
+  const openRazorpayCheckout = (razorpayOrderId, paymentType = 'topup') => {
+    console.log(`Opening Razorpay for ${paymentType} payment with order ID: ${razorpayOrderId}`);
+    
+    const options = {
       key: 'rzp_test_LKwcKdhRp0mq9f',
       currency: 'INR',
       name: 'Roll2Bowl Technologies Pvt Ltd',
-      description: `Payment for your ${paymentType === 'topup' ? 'top-up' : paymentType === 'renew' ? 'renewal' : 'upgrade'}`,
+      description: `Payment for your ${
+        paymentType === 'topup' ? 'top-up' : 
+        paymentType === 'renew' ? 'subscription renewal' : 
+        paymentType === 'upgrade' ? 'subscription upgrade' : 'subscription purchase'
+      }`,
       order_id: razorpayOrderId,
-      handler: async (response: any) => {
+      handler: async (response) => {
         try {
-          console.log('Payment response:', response);
+          console.log(`${paymentType} payment successful:`, response);
           
-          let verifyEndpoint = '/subscription-topup-verify'; // Default for top-up
-          
-          if (paymentType === 'upgrade') {
-            verifyEndpoint = '/subscription/upgrade-verify';
-          } else if (paymentType === 'renew') {
-            verifyEndpoint = '/subscription/renew-verify';
-          }
-          
-          const verifyResponse = await PaymentService.verifyPayment({
+          // Create payment verification data object with consistent structure
+          const paymentVerificationData = {
             razorpayPaymentId: response.razorpay_payment_id,
             razorpayOrderId: response.razorpay_order_id,
             razorpaySignature: response.razorpay_signature,
-          }, verifyEndpoint);
-
+            // Add additional fields for renewal if needed
+            ...(paymentType === 'renew' && {
+              branchId: selectedBranch._id,
+              subscriptionId: activeSubscription?.subscription
+            })
+          };
+          
+          console.log(`Verification data for ${paymentType}:`, paymentVerificationData);
+          
+          // Use the appropriate endpoint based on payment type
+          let verifyEndpoint = '';
+          let successMsg = '';
+          
+          if (paymentType === 'topup') {
+            verifyEndpoint = '/subscription-topup-verify';
+            successMsg = `Payment successful! Your top-up of ${quantity} orders has been processed.`;
+          } else if (paymentType === 'renew') {
+            verifyEndpoint = '/subscription/renew-verify';
+            successMsg = 'Payment successful! Your subscription has been renewed.';
+          } else if (paymentType === 'upgrade') {
+            verifyEndpoint = '/subscription/upgrade-verify';
+            successMsg = 'Payment successful! Your subscription has been upgraded.';
+          } else {
+            verifyEndpoint = '/subscription/purchase-verify';
+            successMsg = 'Payment successful! Your subscription has been purchased.';
+          }
+          
+          console.log(`Using verification endpoint for ${paymentType}:`, verifyEndpoint);
+          
+          // Invoke the payment verification with additionalData if needed
+          console.log(`Calling payment verification for ${paymentType}...`);
+          const verifyResponse = await PaymentService.verifyPayment(
+            paymentVerificationData,
+            verifyEndpoint
+          );
+  
+          console.log(`Verification response for ${paymentType}:`, verifyResponse);
+  
           if (verifyResponse.status === 200) {
-            let successMsg = '';
-            
-            if (paymentType === 'topup') {
-              successMsg = `Payment successful! Your top-up of ${quantity} orders has been processed.`;
-            } else if (paymentType === 'renew') {
-              successMsg = 'Payment successful! Your subscription has been renewed.';
-            } else {
-              successMsg = 'Payment successful! Your subscription has been upgraded.';
-            }
-            
+            console.log(`${paymentType} verification successful`);
             alert(successMsg);
             
             // Close any open dialogs
             setOpenConfigDialog(false);
             setOpenUpgradeDialog(false);
+            setOpenPurchaseDialog(false);
             
             // Reset any errors
             setConfigError(null);
             setUpgradeError(null);
+            setPurchaseError(null);
             
-            // Refresh data
-            fetchStats();
-            fetchConfiguration();
-            fetchSubscription();
+            // Refresh data with slight delay to ensure server has processed the change
+            setTimeout(() => {
+              fetchStats();
+              fetchConfiguration();
+              fetchSubscription();
+            }, 1000);
             
             // Set success message
             setSuccessMessage(successMsg);
           } else {
-            alert('Payment verification failed.');
+            console.error(`${paymentType} verification failed:`, verifyResponse);
+            alert('Payment verification failed. Please contact support with your payment reference number.');
           }
         } catch (error) {
-          console.error('Error verifying payment:', error);
-          alert('Error verifying payment. Please contact support.');
+          console.error(`Error verifying ${paymentType} payment:`, error);
+          console.error('Error details:', error.response?.data || error.message);
+          alert(`Error verifying payment: ${error.message || 'Unknown error'}`);
         }
       },
       theme: {
@@ -549,15 +748,21 @@ export default function Dashboard() {
       },
       modal: {
         ondismiss: () => {
+          console.log(`${paymentType} payment cancelled by user`);
           alert('Payment cancelled.');
         },
       },
     };
-
-    const razorpay = new (window as any).Razorpay(options);
-    razorpay.open();
+  
+    try {
+      const razorpay = new (window as any).Razorpay(options);
+      razorpay.open();
+      console.log('Razorpay checkout opened successfully');
+    } catch (error) {
+      console.error('Error opening Razorpay:', error);
+      alert('Could not open payment window. Please try again later.');
+    }
   };
-
   // Build stats data
   const statsData = stats
     ? [
@@ -789,8 +994,8 @@ export default function Dashboard() {
                         Used: {activeSubscription.orderCount || 0}
                       </Typography>
                       <Typography variant="caption" color="white">
-                        Total: {activeSubscription.subscriptionDetails?.maxOrders || 
-                                activeSubscription.maxOrders || 100}
+                        Total: {activeSubscription.maxOrders || 
+                                activeSubscription.subscriptionDetails?.maxOrders || 100}
                       </Typography>
                     </Box>
                   </Box>
@@ -846,7 +1051,7 @@ export default function Dashboard() {
                   <Box display="flex" gap={1} mt={2}>
                     <Button 
                       variant="contained" 
-                      color="secondary"
+                      sx={{ bgcolor: 'green', '&:hover': { bgcolor: 'darkgreen' } }}
                       onClick={handleOpenUpgradeDialog}
                     >
                       Upgrade Subscription
@@ -859,7 +1064,7 @@ export default function Dashboard() {
                     No active subscription found for this branch.
                   </Typography>
                   <Box display="flex" justifyContent="center">
-                    <Button variant="contained" onClick={handleOpenConfigDialog}>
+                    <Button variant="contained" onClick={handleOpenPurchaseDialog}>
                       Purchase Subscription
                     </Button>
                   </Box>
@@ -869,6 +1074,15 @@ export default function Dashboard() {
           </Box>
         </>
       )}
+
+      {/* Purchase Subscription Dialog */}
+      <PurchaseSubscriptionDialog
+        open={openPurchaseDialog}
+        onClose={handleClosePurchaseDialog}
+        onPurchase={handlePurchaseSubscription}
+        error={purchaseError}
+        loading={purchasingSubscription}
+      />
     </Box>
   );
 }

@@ -1,4 +1,4 @@
-// src/services/subscription.service.ts
+// Updated src/services/subscription.service.ts
 import api from '../utils/axios';
 
 export const SubscriptionService = {
@@ -40,6 +40,21 @@ export const SubscriptionService = {
       { 
         branchId, 
         newSubscriptionId,
+        amount 
+      }, 
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+  },
+  purchaseSubscription: (branchId: string, subscriptionId: string, amount: number) => {
+    const token = localStorage.getItem('authToken');
+    return api.post('/subscription/purchase', 
+      { 
+        branchId, 
+        subscriptionId,
         amount 
       }, 
       {

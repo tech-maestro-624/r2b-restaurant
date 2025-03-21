@@ -35,8 +35,8 @@ const DateRangeDialog: React.FC<DateRangeDialogProps> = ({
 }) => {
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Select Date Range</DialogTitle>
-      <DialogContent>
+      <DialogTitle sx={{ bgcolor: '#2A2D32', color: 'white' }}>Select Date Range</DialogTitle>
+      <DialogContent sx={{ bgcolor: '#2A2D32', color: 'white' }}>
         <Stack direction="column" spacing={2} sx={{ mt: 1 }}>
           <TextField
             label="Start Date"
@@ -50,6 +50,7 @@ const DateRangeDialog: React.FC<DateRangeDialogProps> = ({
               max: endDate || undefined,
             }}
             fullWidth
+            sx={{ input: { color: 'white' }, label: { color: 'white' } }}
           />
           <TextField
             label="End Date"
@@ -63,6 +64,7 @@ const DateRangeDialog: React.FC<DateRangeDialogProps> = ({
               min: startDate || undefined,
             }}
             fullWidth
+            sx={{ input: { color: 'white' }, label: { color: 'white' } }}
           />
         </Stack>
         {error && (
@@ -71,7 +73,7 @@ const DateRangeDialog: React.FC<DateRangeDialogProps> = ({
           </Typography>
         )}
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ bgcolor: '#2A2D32' }}>
         <Button onClick={onClose} color="secondary">
           Cancel
         </Button>
@@ -83,4 +85,4 @@ const DateRangeDialog: React.FC<DateRangeDialogProps> = ({
   );
 };
 
-export default DateRangeDialog;
+export default DateRangeDialog;   

@@ -1,4 +1,4 @@
-// src/components/Dialog/upgradeDialog.tsx
+// src/components/Dialog/purchaseSubscriptionDialog.tsx
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -21,20 +21,18 @@ import {
 } from '@mui/material';
 import { SubscriptionService } from '../../services/subscription.service';
 
-interface UpgradeDialogProps {
+interface PurchaseSubscriptionDialogProps {
   open: boolean;
   onClose: () => void;
-  currentSubscriptionId: string | null;
-  onUpgrade: (subscriptionId: string, amount: number) => void;
+  onPurchase: (subscriptionId: string, amount: number) => void;
   error: string | null;
   loading: boolean;
 }
 
-const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
+const PurchaseSubscriptionDialog: React.FC<PurchaseSubscriptionDialogProps> = ({
   open,
   onClose,
-  currentSubscriptionId,
-  onUpgrade,
+  onPurchase,
   error,
   loading,
 }) => {
@@ -62,15 +60,11 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
     try {
       const response = await SubscriptionService.getAllSubscriptions();
       if (response.data && response.data.subscriptions) {
-        // Filter out the current subscription
-        const filteredSubscriptions = response.data.subscriptions.filter(
-          (sub: any) => sub._id !== currentSubscriptionId
-        );
-        setSubscriptions(filteredSubscriptions);
+        setSubscriptions(response.data.subscriptions);
         
         // If there are subscriptions, preselect the first one
-        if (filteredSubscriptions.length > 0) {
-          setSelectedSubscriptionId(filteredSubscriptions[0]._id);
+        if (response.data.subscriptions.length > 0) {
+          setSelectedSubscriptionId(response.data.subscriptions[0]._id);
         }
       } else {
         setFetchError('No subscription plans available');
@@ -91,7 +85,7 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
     
     const selectedPlan = subscriptions.find(sub => sub._id === selectedSubscriptionId);
     if (selectedPlan) {
-      onUpgrade(selectedSubscriptionId, selectedPlan.price);
+      onPurchase(selectedSubscriptionId, selectedPlan.price);
     }
   };
 
@@ -115,9 +109,9 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ bgcolor: '#2A2D32', color: 'white' }}>Upgrade Subscription</DialogTitle>
-      <DialogContent sx={{ bgcolor: '#2A2D32', color: 'white' }}>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth   PaperProps={{ sx: { bgcolor: '#2A2D32', color: 'white' } }}>
+      <DialogTitle>Purchase Subscription</DialogTitle>
+      <DialogContent>
         {fetchError && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {fetchError}
@@ -136,12 +130,12 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
           </Box>
         ) : subscriptions.length === 0 ? (
           <Typography variant="body1" align="center" py={2}>
-            No other subscription plans available for upgrade.
+            No subscription plans available.
           </Typography>
         ) : (
           <>
             <Typography variant="body2" gutterBottom sx={{ mb: 2 }}>
-              Select a subscription plan to upgrade to:
+              Select a subscription plan to purchase:
             </Typography>
             
             <RadioGroup
@@ -162,8 +156,6 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
                       borderColor: 'primary.main',
                       bgcolor: 'action.hover',
                     },
-                    bgcolor: '#2A2D32',
-                    color: 'white',
                   }}
                 >
                   <FormControlLabel
@@ -203,7 +195,7 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
           </>
         )}
       </DialogContent>
-      <DialogActions sx={{ bgcolor: '#2A2D32' }}>
+      <DialogActions>
         <Button onClick={onClose} disabled={loading}>
           Cancel
         </Button>
@@ -213,11 +205,11 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
           color="primary"
           disabled={loading || !selectedSubscriptionId || subscriptions.length === 0}
         >
-          {loading ? <CircularProgress size={24} /> : 'Upgrade'}
+          {loading ? <CircularProgress size={24} /> : 'Purchase'}
         </Button>
       </DialogActions>
     </Dialog>
   );
 };
 
-export default UpgradeDialog;
+export default PurchaseSubscriptionDialog;

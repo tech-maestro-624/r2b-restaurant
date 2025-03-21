@@ -38,7 +38,13 @@ export default function BranchList() {
 
   // Mutation for creating a branch
   const createBranchMutation = useMutation({
-    mutationFn: (newBranch) => branchService.create(newBranch),
+    mutationFn: async (newBranch) => {
+      const currentUser = await branchService.getCurrentUser();
+      if (currentUser) {
+        newBranch.ownerId = currentUser.user._id;
+      }
+      return branchService.create(newBranch);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['branches', page]);
       setOpenForm(false);
@@ -119,11 +125,31 @@ export default function BranchList() {
           onClose={handleCloseForm}
           fullWidth
           maxWidth={false}
-          PaperProps={{
+          PaperProps={{   
             sx: {
               width: '90vw',
               maxWidth: '90vw',
               margin: 'auto',
+              bgcolor: '#2A2D32', // Background color
+              color: 'white', // Text color
+              '& .MuiInputBase-input': {
+                color: 'white', // Input text color
+              },
+              '& .MuiInputBase-input::placeholder': {
+                color: 'rgba(255, 255, 255, 0.7)', // Placeholder text color
+              },
+              '& .MuiFormLabel-root': {
+                color: 'white', // Label text color
+              },
+              '& .MuiFormLabel-root.Mui-focused': {
+                color: 'white', // Focused label text color
+              },
+              '& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'white', // Outline border color
+              },
+              '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'white', // Focused outline border color
+              },
             },
           }}
         >
@@ -154,6 +180,7 @@ export default function BranchList() {
                     label={branch.isActive ? 'Active' : 'Inactive'}
                     color={branch.isActive ? 'success' : 'default'}
                     size="small"
+                    sx={{border:' 1px solid white'}}
                   />
                 </Box>
 
@@ -216,6 +243,26 @@ export default function BranchList() {
             width: '90vw', // 90% of viewport width
             maxWidth: '90vw',
             margin: 'auto',
+            bgcolor: '#2A2D32', // Background color
+            color: 'white', // Text color
+            '& .MuiInputBase-input': {
+              color: 'white', // Input text color
+            },
+            '& .MuiInputBase-input::placeholder': {
+              color: 'rgba(255, 255, 255, 0.7)', // Placeholder text color
+            },
+            '& .MuiFormLabel-root': {
+              color: 'white', // Label text color
+            },
+            '& .MuiFormLabel-root.Mui-focused': {
+              color: 'white', // Focused label text color
+            },
+            '& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
+              borderColor: 'white', // Outline border color
+            },
+            '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              borderColor: 'white', // Focused outline border color
+            },
           },
         }}
       >

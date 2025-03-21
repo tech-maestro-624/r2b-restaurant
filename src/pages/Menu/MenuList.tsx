@@ -53,67 +53,107 @@ function MenuItemCard({
     const category = categories.find((cat) => cat._id === cateId);
     return category?.name || 'Unknown Category';
   };
-
+  console.log(imageUrl);
   return (
-    <Card sx={{ bgcolor: '#2A2D32', color: 'white', border: '1px solid rgba(255, 255, 255, 0.1)', boxShadow: '0 0 5px rgba(255, 255, 255, 0.1)' }}>
-      {imageId ? (
-        imageLoading ? (
-          <Skeleton variant="rectangular" width="100%" height={140} />
-        ) : imageError || !imageUrl ? (
-          <Typography
-            variant="body2"
-            sx={{ height: 140, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f0f0' }}
-          >
-            No Image
-          </Typography>
-        ) : (
-          <CardMedia component="img" height="140" image={imageUrl} alt={item.name} />
-        )
-      ) : (
-        <Typography
-          variant="body2"
-          sx={{ height: 140, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f0f0' }}
-        >
-          No Image
-        </Typography>
-      )}
+<Card
+  sx={{
+    bgcolor: '#2A2D32',
+    color: 'white',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    boxShadow: '0 0 5px rgba(255, 255, 255, 0.1)',
+  }}
+>
+  {imageId ? (
+    imageLoading ? (
+      <Skeleton variant="rectangular" width="100%" height={300} />
+    ) : imageError || !imageUrl ? (
+      <Box
+        sx={{
+          height: 300,
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#f0f0f0',
+        }}
+      >
+        <Typography variant="body2">No Image</Typography>
+      </Box>
+    ) : (
+      <CardMedia
+        component="img"
+        image={imageUrl}
+        alt={item.name}
+        sx={{
+          height: 300,
+          width: '100%',
+          objectFit: 'cover',
+        }}
+      />
+    )
+  ) : (
+    <Box
+      sx={{
+        height: 300,
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#f0f0f0',
+        color:"black"
+      }}
+    >
+      <Typography variant="body2">No Image</Typography>
+    </Box>
+  )}
 
-      <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-          <Typography variant="h6" component="div">
-            {item.name}
-          </Typography>
-          <Typography variant="h6" color="primary">
-            ₹{item.price}
-          </Typography>
-        </Box>
-        <Typography sx={{ mb: 2, color: 'white' }}>
-          {item.description}
-        </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-          <Chip label={getCategoryName(item.category?._id)} size="small" />
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={item.isAvailable}
-                onChange={(e) => onToggleAvailability(item._id, e.target.checked)}
-              />
-            }
-            label={item.isAvailable ? 'Available' : 'Unavailable'}
+  <CardContent>
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+      <Typography variant="h6" component="div">
+        {item.name}
+      </Typography>
+      <Typography variant="h6" color="primary">
+        ₹{item.price}
+      </Typography>
+    </Box>
+    <Typography
+    sx={{
+      mb: 2,
+      color: 'white',
+      display: '-webkit-box',
+      WebkitLineClamp: 3,
+      WebkitBoxOrient: 'vertical',
+      overflow: 'hidden',
+      height: '60px', // Ensures the container is always 60px tall
+    }}
+  >
+      {item.description}
+    </Typography>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+      <Chip label={getCategoryName(item.category?._id)} size="small" />
+    </Box>
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <FormControlLabel
+        control={
+          <Switch
+            checked={item.isAvailable}
+            onChange={(e) => onToggleAvailability(item._id, e.target.checked)}
           />
-          <Box>
-            <IconButton size="small" onClick={() => onEdit(item)} color="primary">
-              <Edit2 size={16} />
-            </IconButton>
-            <IconButton size="small" onClick={() => onDelete(item._id)} color="error">
-              <Trash2 size={16} />
-            </IconButton>
-          </Box>
-        </Box>
-      </CardContent>
-    </Card>
+        }
+        label={item.isAvailable ? 'Available' : 'Unavailable'}
+      />
+      <Box>
+        <IconButton size="small" onClick={() => onEdit(item)} color="primary">
+          <Edit2 size={16} />
+        </IconButton>
+        <IconButton size="small" onClick={() => onDelete(item._id)} color="error">
+          <Trash2 size={16} />
+        </IconButton>
+      </Box>
+    </Box>
+  </CardContent>
+</Card>
+
   );
 }
 
@@ -210,9 +250,9 @@ export default function MenuList() {
         variant="scrollable"
         scrollButtons="auto"
       >
-        <Tab label="All Items" value="all" />
+        <Tab label="All Items" value="all" sx={{color:'white'}} />
         {categories.map((category: MenuCategory) => (
-          <Tab key={category._id} label={category.name} value={category._id} />
+          <Tab key={category._id} label={category.name} value={category._id} sx={{ color: 'white' }} />
         ))}
       </Tabs>
 

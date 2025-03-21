@@ -26,19 +26,26 @@ export default function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     <Dialog open={open} onClose={onCancel} maxWidth="xs" fullWidth>
-      <DialogTitle>{title}</DialogTitle>
-      <DialogContent>
+      <DialogTitle sx={{ bgcolor: '#2A2D32', color: 'white' }}>{title}</DialogTitle>
+      <DialogContent sx={{ bgcolor: '#2A2D32', color: 'white' }}>
         <Typography>{message}</Typography>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onCancel} disabled={loading}>
-          Cancel
+      <DialogActions sx={{ bgcolor: '#2A2D32' }}>
+        <Button
+          onClick={onCancel}
+          color="success"
+          variant="contained"
+          disabled={loading}
+          sx={{ bgcolor: 'green', color: 'white', '&:hover': { bgcolor: 'darkgreen' } }}
+        >
+          {loading ? 'Processing...' : 'Cancel'}
         </Button>
         <Button
           onClick={onConfirm}
           color="error"
           variant="contained"
           disabled={loading}
+          sx={{ bgcolor: 'red', color: 'white' }}
         >
           {loading ? 'Processing...' : 'Confirm'}
         </Button>

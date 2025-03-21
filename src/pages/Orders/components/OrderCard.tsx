@@ -32,12 +32,16 @@ export default function OrderCard({ order, onViewDetails, onStatusChange }: Orde
   };
 
   return (
-    <Card sx={{ 
-      backgroundColor: '#2A2D32', 
-      color: 'white',
-      fontSize: '1.1rem',
-      borderRadius: '12px' // Added border radius
-    }}>
+    <Card 
+      sx={{ 
+        backgroundColor: '#2A2D32', 
+        color: 'white',
+        fontSize: '1.1rem',
+        borderRadius: '12px',
+        cursor: 'pointer'
+      }}
+      onClick={() => onViewDetails(order)}
+    >
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
           <Typography variant="h6" sx={{ fontSize: '1.5rem' }}>
@@ -54,18 +58,20 @@ export default function OrderCard({ order, onViewDetails, onStatusChange }: Orde
             color={order?.paymentStatus === 'paid' ? 'success' : 'warning'}
             size="small"
           />
-          <Chip
-            label={order.paymentMethod}
-            variant="outlined"
-            size="small"
-          />
+          <Chip label={order.paymentMethod} variant="outlined" size="small" />
         </Stack>
 
+        {/* New field for Restaurant Name */}
         <Typography variant="body2" sx={{ color: 'white', fontSize: '1.1rem' }} gutterBottom>
-          Customer: {order?.customer?.name}
+          Restaurant: {order?.restaurant?.name || 'N/A'}
+        </Typography>
+
+        {/* Customer details */}
+        <Typography variant="body2" sx={{ color: 'white', fontSize: '1.1rem' }} gutterBottom>
+          Customer: {order?.customer?.name || 'N/A'}
         </Typography>
         <Typography variant="body2" sx={{ color: 'white', fontSize: '1.1rem' }} gutterBottom>
-          Phone: {order?.customer?.phoneNumber}
+          Phone: {order?.customer?.phoneNumber || 'N/A'}
         </Typography>
         <Typography variant="body2" sx={{ color: 'white', fontSize: '1.1rem' }} gutterBottom>
           Items: {order.items.length}
@@ -88,18 +94,10 @@ export default function OrderCard({ order, onViewDetails, onStatusChange }: Orde
                 sx={{
                   color: 'white',
                   fontSize: '1.1rem',
-                  '.MuiSvgIcon-root': {
-                    color: 'white',
-                  },
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'white',
-                  },
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'white',
-                  },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'white',
-                  },
+                  '.MuiSvgIcon-root': { color: 'white' },
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
+                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
                 }}
               >
                 <MenuItem value="Placed">Placed</MenuItem>

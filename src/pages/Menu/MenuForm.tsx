@@ -189,9 +189,11 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)}>
-      <DialogTitle>{item ? 'Edit Menu Item' : 'Add Menu Item'}</DialogTitle>
+      <DialogTitle sx={{ bgcolor: '#2A2D32', color: 'white' }}>
+        {item ? 'Edit Menu Item' : 'Add Menu Item'}
+      </DialogTitle>
 
-      <DialogContent>
+      <DialogContent sx={{ bgcolor: '#2A2D32', color: 'white' }}>
         {/* 2 Columns Layout */}
         <Grid container spacing={2}>
           {/* Left Column */}
@@ -203,6 +205,9 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                 {...register('name', { required: 'Name is required' })}
                 error={!!errors.name}
                 helperText={errors.name?.message}
+                sx={{ bgcolor: '#2A2D32', color: 'white', '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: 'lightblue' }, '&:hover fieldset': { borderColor: 'lightblue' }, '&.Mui-focused fieldset': { borderColor: 'lightblue' } }, '& .MuiInputLabel-root': { color: 'lightblue' }, '& .MuiInputLabel-root.Mui-focused': { color: 'lightblue' } }}
+                InputLabelProps={{ style: { color: 'white' } }}
+                InputProps={{ style: { color: 'white' } }}
               />
 
               <TextField
@@ -213,6 +218,9 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                 {...register('description', { required: 'Description is required' })}
                 error={!!errors.description}
                 helperText={errors.description?.message}
+                sx={{ bgcolor: '#2A2D32', color: 'white', '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: 'lightblue' }, '&:hover fieldset': { borderColor: 'lightblue' }, '&.Mui-focused fieldset': { borderColor: 'lightblue' } }, '& .MuiInputLabel-root': { color: 'lightblue' }, '& .MuiInputLabel-root.Mui-focused': { color: 'lightblue' } }}
+                InputLabelProps={{ style: { color: 'white' } }}
+                InputProps={{ style: { color: 'white' } }}
               />
 
               <TextField
@@ -221,18 +229,24 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                 {...register('packagingCharge', {
                   required: 'Packaging Charge is required',
                 })}
-                error={!!errors.name}
+                error={!!errors.packagingCharge}
                 helperText={errors.packagingCharge?.message}
+                sx={{ bgcolor: '#2A2D32', color: 'white', '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: 'lightblue' }, '&:hover fieldset': { borderColor: 'lightblue' }, '&.Mui-focused fieldset': { borderColor: 'lightblue' } }, '& .MuiInputLabel-root': { color: 'lightblue' }, '& .MuiInputLabel-root.Mui-focused': { color: 'lightblue' } }}
+                InputLabelProps={{ style: { color: 'white' } }}
+                InputProps={{ style: { color: 'white' } }}
               />
 
               <TextField
                 label="Preparation Time in Mins"
                 fullWidth
                 {...register('preparationTime', {
-                  required: 'Preparation Time  is required',
+                  required: 'Preparation Time is required',
                 })}
-                error={!!errors.name}
+                error={!!errors.preparationTime}
                 helperText={errors.preparationTime?.message}
+                sx={{ bgcolor: '#2A2D32', color: 'white', '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: 'lightblue' }, '&:hover fieldset': { borderColor: 'lightblue' }, '&.Mui-focused fieldset': { borderColor: 'lightblue' } }, '& .MuiInputLabel-root': { color: 'lightblue' }, '& .MuiInputLabel-root.Mui-focused': { color: 'lightblue' } }}
+                InputLabelProps={{ style: { color: 'white' } }}
+                InputProps={{ style: { color: 'white' } }}
               />
 
               {/* Dish Type */}
@@ -242,7 +256,7 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                 rules={{ required: 'Dish type is required' }}
                 render={({ field }) => (
                   <FormControl component="fieldset">
-                    <FormLabel component="legend">Dish Type</FormLabel>
+                    <FormLabel component="legend" sx={{ color: 'white' }}>Dish Type</FormLabel>
                     <RadioGroup row {...field}>
                       <FormControlLabel value="veg" control={<Radio />} label="Vegetarian" />
                       <FormControlLabel
@@ -266,8 +280,8 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                 rules={{ required: 'Category is required' }}
                 render={({ field }) => (
                   <FormControl fullWidth error={!!errors.category}>
-                    <InputLabel>Category</InputLabel>
-                    <Select {...field} label="Category">
+                    <InputLabel sx={{ color: 'lightblue' }}>Category</InputLabel>
+                    <Select {...field} label="Category" sx={{ color: 'white', '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: 'lightblue' }, '&:hover fieldset': { borderColor: 'lightblue' }, '&.Mui-focused fieldset': { borderColor: 'lightblue' } }, '& .MuiInputLabel-root': { color: 'lightblue' }, '& .MuiInputLabel-root.Mui-focused': { color: 'lightblue' } }}>
                       <MuiMenuItem value="">
                         <em>None</em>
                       </MuiMenuItem>
@@ -294,7 +308,10 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
               </Button>
 
               {showCategoryForm && (
-                <Dialog open onClose={() => setShowCategoryForm(false)}>
+                <Dialog open onClose={() => setShowCategoryForm(false)}
+                
+                PaperProps={{ sx: { bgcolor: '#2A2D32', color: 'white' } }}
+>
                   <DialogTitle>Create a Category</DialogTitle>
                   <DialogContent>
                     <TextField
@@ -304,6 +321,7 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                       value={newCategoryName}
                       onChange={(e) => setNewCategoryName(e.target.value.trim())}
                       disabled={isCreatingCategory}
+                      sx= {{ color: 'white' }}
                     />
                   </DialogContent>
                   <DialogActions>
@@ -347,7 +365,6 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                 </Dialog>
               )}
 
-
               <FormControlLabel
                 control={<Switch checked={watch('includesTax')} {...register('includesTax')} />}
                 label="Inclusive of Tax"
@@ -361,7 +378,7 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                 rules={{ required: 'Tax slab is required' }}
                 render={({ field }) => (
                   <FormControl component="fieldset" error={!!errors.taxSlab}>
-                    <FormLabel component="legend">Tax Slab</FormLabel>
+                    <FormLabel component="legend" sx={{ color: 'white' }}>Tax Slab</FormLabel>
                     <RadioGroup
                       row
                       {...field}
@@ -379,9 +396,9 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                       </Typography>
                     )}
                   </FormControl>
-                )}
+              )}
               />
-              }
+            }
             </Box>
           </Grid>
 
@@ -389,7 +406,7 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
           <Grid item xs={12} md={6}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Box>
-                <Typography variant="subtitle1">Upload Image</Typography>
+                <Typography variant="subtitle1" sx={{ color: 'white' }}>Upload Image</Typography>
                 <input
                   type="file"
                   accept="image/*"
@@ -429,7 +446,10 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                   type="number"
                   fullWidth
                   InputProps={{
-                    startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+                    startAdornment:<InputAdornment position="start">
+                    <Typography sx={{ color: 'white' }}>₹</Typography>
+                  </InputAdornment>,
+                    style: { color: 'white' }
                   }}
                   {...register('price', {
                     required: !watch('hasVariants') ? 'Price is required' : false,
@@ -437,6 +457,8 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                   })}
                   error={!!errors.price}
                   helperText={errors.price?.message}
+                  sx={{ bgcolor: '#2A2D32', color: 'white', '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: 'lightblue' }, '&:hover fieldset': { borderColor: 'lightblue' }, '&.Mui-focused fieldset': { borderColor: 'lightblue' } }, '& .MuiInputLabel-root': { color: 'lightblue' }, '& .MuiInputLabel-root.Mui-focused': { color: 'lightblue' } }}
+                  InputLabelProps={{ style: { color: 'white' } }}
                 />
               )}
 
@@ -450,7 +472,7 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                       mb: 2,
                     }}
                   >
-                    <Typography variant="subtitle1">Variants</Typography>
+                    <Typography variant="subtitle1" sx={{ color: 'white' }}>Variants</Typography>
                     <Button
                       startIcon={<Plus size={20} />}
                       onClick={() =>
@@ -471,6 +493,9 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                           label="Label"
                           fullWidth
                           {...register(`variants.${index}.label`)}
+                          sx={{ bgcolor: '#2A2D32', color: 'white', '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: 'lightblue' }, '&:hover fieldset': { borderColor: 'lightblue' }, '&.Mui-focused fieldset': { borderColor: 'lightblue' } }, '& .MuiInputLabel-root': { color: 'lightblue' }, '& .MuiInputLabel-root.Mui-focused': { color: 'lightblue' } }}
+                          InputLabelProps={{ style: { color: 'white' } }}
+                          InputProps={{ style: { color: 'white' } }}
                         />
                       </Grid>
                       <Grid item xs={4}>
@@ -480,10 +505,13 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                           fullWidth
                           InputProps={{
                             startAdornment: (
-                              <InputAdornment position="start">₹</InputAdornment>
+                              <InputAdornment position="start" style={{ color: 'white' }}>₹</InputAdornment>
                             ),
+                            style: { color: 'white' }
                           }}
                           {...register(`variants.${index}.price`)}
+                          sx={{ bgcolor: '#2A2D32', color: 'white', '& .MuiOutlinedInput-root': { '& fieldset': { borderColor: 'lightblue' }, '&:hover fieldset': { borderColor: 'lightblue' }, '&.Mui-focused fieldset': { borderColor: 'lightblue' } }, '& .MuiInputLabel-root': { color: 'lightblue' }, '& .MuiInputLabel-root.Mui-focused': { color: 'lightblue' } }}
+                          InputLabelProps={{ style: { color: 'white' } }}
                         />
                       </Grid>
                       <Grid item xs={3}>
@@ -492,6 +520,9 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                           type="number"
                           fullWidth
                           {...register(`variants.${index}.attributes.servingSize`)}
+                          sx={{ bgcolor: '#2A2D32', color: 'white' }}
+                          InputLabelProps={{ style: { color: 'white' } }}
+                          InputProps={{ style: { color: 'white' } }}
                         />
                       </Grid>
                       <Grid item xs={1}>
@@ -513,7 +544,7 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                     mb: 2,
                   }}
                 >
-                  <Typography variant="subtitle1">Add-ons</Typography>
+                  <Typography variant="subtitle1" sx={{ color: 'white' }}>Add-ons</Typography>
                   <Button
                     startIcon={<Plus size={20} />}
                     onClick={() => appendAddOn({ name: '', price: 0 })}
@@ -528,6 +559,9 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                         label="Name"
                         fullWidth
                         {...register(`addOns.${index}.name`)}
+                        sx={{ bgcolor: '#2A2D32', color: 'white' }}
+                        InputLabelProps={{ style: { color: 'white' } }}
+                        InputProps={{ style: { color: 'white' } }}
                       />
                     </Grid>
                     <Grid item xs={5}>
@@ -536,9 +570,12 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                         type="number"
                         fullWidth
                         InputProps={{
-                          startAdornment: <InputAdornment position="start">₹</InputAdornment>,
+                          startAdornment: <InputAdornment position="start" style={{ color: 'white' }}>₹</InputAdornment>,
+                          style: { color: 'white' }
                         }}
                         {...register(`addOns.${index}.price`)}
+                        sx={{ bgcolor: '#2A2D32', color: 'white' }}
+                        InputLabelProps={{ style: { color: 'white' } }}
                       />
                     </Grid>
                     <Grid item xs={1}>
@@ -559,7 +596,7 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                     mb: 2,
                   }}
                 >
-                  <Typography variant="subtitle1">Options</Typography>
+                  <Typography variant="subtitle1" sx={{ color: 'white' }}>Options</Typography>
                   <Button
                     startIcon={<Plus size={20} />}
                     onClick={() => appendOption({ option: '', choices: [''] })}
@@ -575,6 +612,9 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                           label="Option Name"
                           fullWidth
                           {...register(`options.${index}.option`)}
+                          sx={{ bgcolor: '#2A2D32', color: 'white' }}
+                          InputLabelProps={{ style: { color: 'white' } }}
+                          InputProps={{ style: { color: 'white' } }}
                         />
                       </Grid>
                       <Grid item xs={1}>
@@ -586,9 +626,11 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
                     <TextField
                       label="Choices (comma-separated)"
                       fullWidth
-                      sx={{ mt: 1 }}
+                      sx={{ mt: 1, bgcolor: '#2A2D32', color: 'white' }}
                       {...register(`options.${index}.choices`)}
                       helperText="Enter choices separated by commas"
+                      InputLabelProps={{ style: { color: 'white' } }}
+                      InputProps={{ style: { color: 'white' } }}
                     />
                   </Box>
                 ))}
@@ -598,8 +640,8 @@ export default function MenuForm({ item, onClose, categories }: MenuFormProps) {
         </Grid>
       </DialogContent>
 
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+      <DialogActions sx={{ bgcolor: '#2A2D32', color: 'white' }}>
+        <Button onClick={onClose} sx={{ color: 'white' }}>Cancel</Button>
         <Button type="submit" variant="contained" disabled={mutation.isPending}>
           {mutation.isPending ? 'Saving...' : item ? 'Update' : 'Create'}
         </Button>

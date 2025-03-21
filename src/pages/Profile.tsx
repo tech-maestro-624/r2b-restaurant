@@ -1,22 +1,71 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Avatar, Button, TextField } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
-import { User } from '../types/auth';
+import api from '../utils/axios';
+import { branchService } from '../services/branch.service';
+import { useNavigate } from 'react-router-dom';
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
-  const [name, setName] = useState(user?.name || '');
-  const [email, setEmail] = useState(user?.email || '');
-  const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || '');
+  const [name, setName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [phoneNumberError, setPhoneNumberError] = useState('');
 
-  if (!user) {
-    return <Typography variant="h6">Loading...</Typography>;
-  }
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const userData = await branchService.getCurrentUser();
+      console.log(userData)
+      if (userData) {
+        setName(userData.name);
+        setPhoneNumber(userData.phoneNumber);
+      }
+    };
 
-  const handleSave = () => {
-    // Implement save functionality here
-    console.log('Saved:', { name, email, phoneNumber });
+    fetchUserData();
+  }, []);
+
+  const handleSave = async () => {
+    let valid = true;
+
+    if (!name) {
+      setNameError('Name is required');
+      valid = false;
+    } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+      setNameError('Name is invalid');
+      valid = false;
+    } else {
+      setNameError('');
+    }
+
+    if (!phoneNumber) {
+      setPhoneNumberError('Phone number is required');
+      valid = false;
+    } else if (!/^\d{10}$/.test(phoneNumber)) {
+      setPhoneNumberError('Phone number is invalid');
+      valid = false;
+    } else {
+      setPhoneNumberError('');
+    }
+
+    if (!valid) {
+      return;
+    }
+
+    try {
+      if (!user) {
+        console.error('User is not authenticated');
+        return;
+      }
+      const response = await api.put(`/user/${user._id}`, { name, phoneNumber });
+      console.log('Saved:', response.data);
+      navigate('/dashboard'); // Redirect to the dashboard after successful save
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      // Optionally, show an error message
+    }
   };
 
   return (
@@ -44,7 +93,7 @@ const Profile: React.FC = () => {
       >
         <Avatar
           alt={name || 'User Avatar'}
-          src={user.avatarUrl || ''}
+          src={user?.avatarUrl || ''}
           sx={{ width: 100, height: 100, margin: '0 auto 20px' }}
         />
         <Typography variant="h5" component="h1" gutterBottom>
@@ -59,16 +108,8 @@ const Profile: React.FC = () => {
           margin="normal"
           InputLabelProps={{ style: { color: 'white' } }} // Set the label color to white
           InputProps={{ style: { color: 'white' } }} // Set the input text color to white
-        />
-        <TextField
-          fullWidth
-          label="Email"
-          variant="outlined"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          margin="normal"
-          InputLabelProps={{ style: { color: 'white' } }} // Set the label color to white
-          InputProps={{ style: { color: 'white' } }} // Set the input text color to white
+          error={!!nameError}
+          helperText={nameError}
         />
         <TextField
           fullWidth
@@ -79,6 +120,8 @@ const Profile: React.FC = () => {
           margin="normal"
           InputLabelProps={{ style: { color: 'white' } }} // Set the label color to white
           InputProps={{ style: { color: 'white' } }} // Set the input text color to white
+          error={!!phoneNumberError}
+          helperText={phoneNumberError}
         />
         <Button
           variant="contained"

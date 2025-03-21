@@ -10,11 +10,18 @@ const AuthContext = createContext<AuthContextType | null>(null);
 const USER_STORAGE_KEY = 'restaurant_admin_user';
 const TOKEN_STORAGE_KEY = 'authToken';
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    const storedUser = localStorage.getItem(USER_STORAGE_KEY);
-    return storedUser ? JSON.parse(storedUser) : null;
+// Helper function to clear all branch selections from local storage.
+const clearBranchStorage = () => {
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('selected_branch_')) {
+      localStorage.removeItem(key);
+    }
   });
+};
+
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  // Always initialize user as null instead of reading from localStorage.
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
@@ -27,31 +34,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
         return;
       }
-  
+
       try {
+        // Verify token validity and get fresh user info.
         const { data } = await authService.checkAuth();
         console.log('Auth check successful:', data);
         setUser(data.user);
         localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
-  
-        // Redirect if authenticated but on login/verify-otp page
+
+        // Redirect if authenticated but on login/verify-otp page.
         if (['/login', '/verify-otp'].includes(location.pathname)) {
           navigate('/dashboard');
         }
       } catch (error) {
         console.error('Auth check failed:', error);
         if (isAuthError(error)) {
-          logout(); // Automatically handle invalid tokens
+          logout(); // Handle invalid tokens.
         }
       } finally {
         setLoading(false);
       }
     };
-  
+
     checkAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate, location.pathname]);
 
   const login = async (phoneNumber: string) => {
+    // Clear any stale data before starting a new login flow.
+    localStorage.removeItem(USER_STORAGE_KEY);
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    clearBranchStorage();
+
     try {
       const { data } = await authService.login(phoneNumber);
       if (data.otp) {
@@ -76,10 +90,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const verifyOTP = async (otp: string, phoneNumber: string) => {
     try {
-      const {data}: any = await authService.verifyOTP(otp, phoneNumber);
+      const { data }: any = await authService.verifyOTP(otp, phoneNumber);
       console.log(data);
-      localStorage.removeItem('phoneNumber');
-      localStorage.setItem(TOKEN_STORAGE_KEY, data.token); // Save the token
+      // Clear any previous user/token data and branch info before saving new ones.
+      localStorage.removeItem(USER_STORAGE_KEY);
+      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      clearBranchStorage();
+
+      localStorage.setItem(TOKEN_STORAGE_KEY, data.token);
       setUser(data.user);
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.user));
       navigate('/dashboard');
@@ -92,15 +110,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = () => {
     try {
-      // Perform logout API call
+      // Optionally, perform logout API call.
       authService.logout();
     } catch (error) {
       handleApiError(error, 'Logout failed');
     } finally {
-      // Clear user data and token
+      // Clear stored user data, token, and any branch info.
       setUser(null);
       localStorage.removeItem(USER_STORAGE_KEY);
       localStorage.removeItem(TOKEN_STORAGE_KEY);
+      clearBranchStorage();
+
       navigate('/login');
       enqueueSnackbar('Logged out successfully', { variant: 'success', preventDuplicate: true });
     }

@@ -19,7 +19,7 @@ export interface CreateRestaurantDto {
 }
 
 export const restaurantService = {
-  getAll: () => api.get<Restaurant[]>('/restaurants'),
+  getAll: () => api.get<Restaurant[]>('/restaurants-branches'),
   getById: (id: string) => api.get<Restaurant>(`/restaurants/${id}`),
   create: (data: CreateRestaurantDto) => api.post<Restaurant>('/restaurants', data),
   update: (id: string, data: Partial<CreateRestaurantDto>) =>

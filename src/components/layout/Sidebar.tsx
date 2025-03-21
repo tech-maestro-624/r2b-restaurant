@@ -135,6 +135,7 @@ export default function Sidebar({ open, onClose, variant }: SidebarProps) {
           height: 'calc(100% - 64px)',
           backgroundColor: '#0F1215',
         },
+        borderRight:'1px solid rgba(255, 255, 255, 0.2)'
       }}
     >
       {drawer}

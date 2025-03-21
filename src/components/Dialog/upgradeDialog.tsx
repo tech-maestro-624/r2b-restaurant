@@ -116,8 +116,8 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Upgrade Subscription</DialogTitle>
-      <DialogContent>
+      <DialogTitle sx={{ bgcolor: '#2A2D32', color: 'white' }}>Upgrade Subscription</DialogTitle>
+      <DialogContent sx={{ bgcolor: '#2A2D32', color: 'white' }}>
         {fetchError && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {fetchError}
@@ -147,6 +147,7 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
             <RadioGroup
               value={selectedSubscriptionId}
               onChange={(e) => setSelectedSubscriptionId(e.target.value)}
+              sx={{ color: 'white' }} // Ensure radio group text is white
             >
               {subscriptions.map((subscription) => (
                 <Box
@@ -158,6 +159,8 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
                     borderRadius: 1,
                     p: 2,
                     transition: 'all 0.2s',
+                    bgcolor: '#2A2D32',
+                    color: 'white',
                     '&:hover': {
                       borderColor: 'primary.main',
                       bgcolor: 'action.hover',
@@ -166,7 +169,7 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
                 >
                   <FormControlLabel
                     value={subscription._id}
-                    control={<Radio />}
+                    control={<Radio sx={{ color: 'white' }} />} // Ensure radio button is white
                     label={
                       <Box>
                         <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -187,7 +190,7 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
                         <List dense disablePadding>
                           {getFeaturesList(subscription).map((feature, idx) => (
                             <ListItem key={idx} disablePadding sx={{ py: 0.5 }}>
-                              <ListItemText primary={feature} />
+                              <ListItemText primary={feature} sx={{ color: 'white' }} /> {/* Ensure list item text is white */}
                             </ListItem>
                           ))}
                         </List>
@@ -201,8 +204,8 @@ const UpgradeDialog: React.FC<UpgradeDialogProps> = ({
           </>
         )}
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} disabled={loading}>
+      <DialogActions sx={{ bgcolor: '#2A2D32', color: 'white' }}>
+        <Button onClick={onClose} disabled={loading} sx={{ color: 'white' }}>
           Cancel
         </Button>
         <Button

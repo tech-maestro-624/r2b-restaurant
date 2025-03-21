@@ -1,17 +1,22 @@
 import { useState } from 'react';
 import { TextField, Button, Paper, Box } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
-import Restaurant from '../../assets/Restaurant.png';
-import BackgroundImage from "../../assets/top-view-frame-with-food-copy-space_23-2148247893.avif"
+import BackgroundImage from "../../assets/top-view-frame-with-food-copy-space_23-2148247893.avif";
 import RestaurantBlue from '../../assets/Midnight Blue@4x.png';
 
 export default function Login() {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const { login } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!/^\d{10}$/.test(phone)) {
+      setError('Please enter a valid 10-digit phone number');
+      return;
+    }
+    setError('');
     setLoading(true);
     try {
       await login(phone);
@@ -42,7 +47,7 @@ export default function Login() {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           filter: 'blur(8px)',
-          transform: 'scale(1.1)', /* Slightly scale up to avoid blur edges */
+          transform: 'scale(1.1)',
         }}
       />
       {/* Optional overlay to improve readability */}
@@ -53,7 +58,7 @@ export default function Login() {
           left: 0,
           width: '100%',
           height: '100%',
-          backgroundColor: 'rgba(0, 20, 27, 0.3)', /* Semi-transparent overlay */
+          backgroundColor: 'rgba(0, 20, 27, 0.3)',
         }}
       />
       {/* Centered login form */}
@@ -76,9 +81,9 @@ export default function Login() {
           sx={{
             p: 5,
             width: '100%',
-            backgroundColor: '#ebecde', // Change background color to pale yellow
-            color: 'black', // Change text color to black
-            border: '1px solid black', // Change border color to black
+            backgroundColor: '#ebecde',
+            color: 'black',
+            border: '1px solid black',
             borderRadius: '8px',
             display: 'flex',
             flexDirection: 'column',
@@ -86,15 +91,15 @@ export default function Login() {
           }}
         >
           {/* Restaurant logo inside the form container */}
-          <Box sx={{ textAlign: 'center', mb: 0.5 }}> {/* Further reduced margin-bottom */}
+          <Box sx={{ textAlign: 'center', mb: 0.5 }}>
             <img 
               src={RestaurantBlue} 
               alt="Restaurant Logo" 
               style={{ 
                 maxWidth: '300px',
                 height: 'auto',
-                filter: 'brightness(1.5)', // Lighter color effect
-                borderRadius: '8px', // Add border radius
+                filter: 'brightness(1.5)',
+                borderRadius: '8px',
               }} 
             />
           </Box>
@@ -106,11 +111,13 @@ export default function Login() {
               variant="outlined"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              margin="dense" // Reduced margin
+              margin="dense"
               required
               type="tel"
+              error={!!error}
+              helperText={error || 'Enter your 10-digit phone number'}
               sx={{
-                backgroundColor: 'white',
+                backgroundColor: '#ebecde',
                 '& .MuiInputBase-input': {
                   color: 'black',
                 },
@@ -119,21 +126,24 @@ export default function Login() {
                 },
                 '& .MuiOutlinedInput-root': {
                   '& fieldset': {
-                    borderColor: 'black', 
+                    borderColor: 'black',
                   },
                   '&:hover fieldset': {
-                    borderColor: 'black', 
+                    borderColor: 'black',
                   },
                   '&.Mui-focused fieldset': {
-                    borderColor: 'black', 
+                    borderColor: 'black',
                   },
                 },
-              }}
-              inputProps={{
-                style: { color: 'black' },
-              }}
-              InputProps={{
-                style: { color: 'black' },
+                '& .MuiFormHelperText-root': {
+                  color: error ? 'red' : 'black',
+                  fontSize: '0.875rem',
+                  marginTop: '4px',
+                  fontWeight: 'bold',
+                  backgroundColor: '#ebecde', // Same as login form background
+                  //padding: '4px',
+                  borderRadius: '4px',
+                },
               }}
             />
             <Button
@@ -141,7 +151,7 @@ export default function Login() {
               variant="contained"
               type="submit"
               disabled={loading}
-              sx={{ mt: 3 }}
+              sx={{ mt: 3, backgroundColor: '#1976d2', color: 'white', '&:hover': { backgroundColor: '#1565c0' } }}
             >
               {loading ? 'Sending OTP...' : 'Send OTP'}
             </Button>

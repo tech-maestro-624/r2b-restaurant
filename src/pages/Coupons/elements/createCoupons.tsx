@@ -114,7 +114,7 @@ const CouponForm: React.FC<CouponFormProps> = ({ coupon, onClose }) => {
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ p: 3 }}>
+    <Box component="form" onSubmit={handleSubmit} sx={{ p: 3, bgcolor: '#2A2D32', color: 'white' }}>
       <TextField
         label="Code"
         name="code"
@@ -123,6 +123,12 @@ const CouponForm: React.FC<CouponFormProps> = ({ coupon, onClose }) => {
         fullWidth
         required
         sx={{ mb: 2 }}
+        InputProps={{
+          style: { color: 'white' },
+        }}
+        InputLabelProps={{
+          style: { color: 'white' },
+        }}
       />
       <TextField
         label="Description"
@@ -133,6 +139,12 @@ const CouponForm: React.FC<CouponFormProps> = ({ coupon, onClose }) => {
         multiline
         rows={3}
         sx={{ mb: 2 }}
+        InputProps={{
+          style: { color: 'white' },
+        }}
+        InputLabelProps={{
+          style: { color: 'white' },
+        }}
       />
       <TextField
         label="Discount Type"
@@ -143,6 +155,12 @@ const CouponForm: React.FC<CouponFormProps> = ({ coupon, onClose }) => {
         fullWidth
         required
         sx={{ mb: 2 }}
+        InputProps={{
+          style: { color: 'white' },
+        }}
+        InputLabelProps={{
+          style: { color: 'white' },
+        }}
       >
         <MenuItem value="Percentage">Percentage</MenuItem>
         <MenuItem value="Amount">Amount</MenuItem>
@@ -157,6 +175,12 @@ const CouponForm: React.FC<CouponFormProps> = ({ coupon, onClose }) => {
         fullWidth
         required
         sx={{ mb: 2 }}
+        InputProps={{
+          style: { color: 'white' },
+        }}
+        InputLabelProps={{
+          style: { color: 'white' },
+        }}
       />
       <TextField
         label="Valid From"
@@ -169,8 +193,11 @@ const CouponForm: React.FC<CouponFormProps> = ({ coupon, onClose }) => {
         }
         onChange={handleChange}
         fullWidth
-        InputLabelProps={{ shrink: true }}
+        InputLabelProps={{ shrink: true, style: { color: 'white' } }}
         sx={{ mb: 2 }}
+        InputProps={{
+          style: { color: 'white' },
+        }}
       />
       <TextField
         label="Valid To"
@@ -183,8 +210,11 @@ const CouponForm: React.FC<CouponFormProps> = ({ coupon, onClose }) => {
         }
         onChange={handleChange}
         fullWidth
-        InputLabelProps={{ shrink: true }}
+        InputLabelProps={{ shrink: true, style: { color: 'white' } }}
         sx={{ mb: 2 }}
+        InputProps={{
+          style: { color: 'white' },
+        }}
       />
       <TextField
         label="Min Cart Value"
@@ -195,8 +225,11 @@ const CouponForm: React.FC<CouponFormProps> = ({ coupon, onClose }) => {
         }
         onChange={handleChange}
         fullWidth
-        InputLabelProps={{ shrink: true }}
+        InputLabelProps={{ shrink: true, style: { color: 'white' } }}
         sx={{ mb: 2 }}
+        InputProps={{
+          style: { color: 'white' },
+        }}
       />
    <FormGroup>
   <FormControlLabel
@@ -209,11 +242,12 @@ const CouponForm: React.FC<CouponFormProps> = ({ coupon, onClose }) => {
       />
     }
     label="Free Shipping Coupon?"
+    sx={{ color: 'white' }}
   />
 </FormGroup>
       {branchData?.branches && (
         <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel id="branch-select-label">Branches</InputLabel>
+          <InputLabel id="branch-select-label" sx={{ color: 'white' }}>Branches</InputLabel>
           <Select
             labelId="branch-select-label"
             multiple
@@ -230,6 +264,7 @@ const CouponForm: React.FC<CouponFormProps> = ({ coupon, onClose }) => {
                 })
                 .join(', ');
             }}
+            sx={{ color: 'white' }}
           >
             {branchData.branches.map((branch: any) => (
               <MenuItem key={branch._id} value={branch._id}>

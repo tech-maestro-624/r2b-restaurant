@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payment Test Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2em;
+      background-color: #f4f4f4;
+    }
+    h1 {
+      color: #333;
+    }
+    p {
+      color: #555;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px;
+      border: none;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #result {
+      margin-top: 20px;
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 4px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  </style>
+</head>
+<body>
+  <h1>Payment Test Page</h1>
+  <p>Click a button below to test a payment endpoint:</p>
+  <button id="createOrder">Create Order</button>
+  <button id="createSubscription">Create Subscription</button>
+
+  <div id="result"></div>
+
+  <script>
+    // Update these URLs to match your backend endpoints
+    const ORDER_ENDPOINT = "http://localhost:4000/api/payments/createOrder";
+    const SUBSCRIPTION_ENDPOINT = "http://localhost:4000/api/subscriptions/create";
+
+    document.getElementById('createOrder').addEventListener('click', function() {
+      fetch(ORDER_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: 5000, currency: 'INR' })
+      })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('result').innerHTML = '<h3>Order Created</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+      })
+      .catch(err => {
+        document.getElementById('result').innerHTML = '<p style="color: red;">Error: ' + err + '</p>';
+      });
+    });
+
+    document.getElementById('createSubscription').addEventListener('click', function() {
+      fetch(SUBSCRIPTION_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: 'basic', customer: 'cust_12345' })
+      })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('result').innerHTML = '<h3>Subscription Created</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+      })
+      .catch(err => {
+        document.getElementById('result').innerHTML = '<p style="color: red;">Error: ' + err + '</p>';
+      });
+    });
+  </script>
+</body>
+</html>

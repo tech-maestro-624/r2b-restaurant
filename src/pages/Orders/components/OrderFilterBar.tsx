@@ -139,6 +139,34 @@ export default function OrderFilterBar({ filters, onFilterChange }: OrderFilterB
               }}
             />
           </Grid>
+              <Grid item xs={12} sm={3}>
+              <TextField
+                fullWidth
+                size="small"
+                label="Customer Name"
+                value={filters.customerName || ''}
+                onChange={(e) => onFilterChange({ ...filters, customerName: e.target.value || undefined })}
+                sx={{
+                input: { color: 'white', fontSize: '1.1rem' },
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
+                '& .MuiInputLabel-root': { color: 'white', fontSize: '1.1rem' },
+                }}
+              />
+              </Grid>
+          <Grid item xs={12} sm={3}>
+            <TextField
+              fullWidth
+              size="small"
+              label="Customer Phone"
+              value={filters.customerPhone || ''}
+              onChange={(e) => onFilterChange({ ...filters, customerPhone: e.target.value || undefined })}
+              sx={{
+                input: { color: 'white', fontSize: '1.1rem' },
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: 'white' },
+                '& .MuiInputLabel-root': { color: 'white', fontSize: '1.1rem' },
+              }}
+            />
+          </Grid>
         </Grid>
       </CardContent>
     </Card>
