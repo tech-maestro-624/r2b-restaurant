@@ -160,9 +160,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
         <Typography variant="h6" noWrap component="div" sx={{ mr: 3, color: 'white' }}>
           {isMobile ? 'Admin' : 'Restaurant Admin'}
         </Typography>
-
         <BranchSelector />
-
         <Box sx={{ flexGrow: 1 }} />
 
        

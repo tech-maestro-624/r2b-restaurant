@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Branch } from '../types/branch';
 import { branchService } from '../services/branch.service';
 import { useAuth } from './AuthContext';
@@ -9,109 +9,58 @@ interface BranchContextType {
   setSelectedBranch: (branch: Branch | null) => void;
   branches: Branch[];
   isLoading: boolean;
-  resetBranchState: () => void;
 }
 
 const BranchContext = createContext<BranchContextType | null>(null);
 
-const BRANCH_STORAGE_KEY = 'selected_branch';
-const USER_ID_KEY = 'branch_user_id';
-
 export const BranchProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
-  console.log('user',user);
   const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
-  const queryClient = useQueryClient();
-  const previousUserId = useRef<string | null>(null);
-  
-  // Function to completely reset branch state
-  const resetBranchState = () => {
-    setSelectedBranch(null);
-    localStorage.removeItem(BRANCH_STORAGE_KEY);
-    localStorage.removeItem(USER_ID_KEY);
-    queryClient.removeQueries(['branches']);
-    console.log('Branch state reset completely');
-  };
 
-  // Query for branches with proper dependencies and reset on user change
+  // When the user changes, load the branch stored for that specific user.
+  useEffect(() => {
+    if (user) {
+      const stored = localStorage.getItem(`selected_branch_${user._id}`);
+      if (stored) {
+        setSelectedBranch(JSON.parse(stored));
+      } else {
+        setSelectedBranch(null);
+      }
+    } else {
+      // Clear selection when no user is present.
+      setSelectedBranch(null);
+    }
+  }, [user]);
+
   const { data: branchData, isLoading } = useQuery({
     queryKey: ['branches', user?._id],
     queryFn: () => branchService.getAll().then((res) => res.data),
     enabled: !!user,
-    staleTime: 300000, // 5 minutes
-    onError: () => {
-      // Clear branch data on error
-      resetBranchState();
-    }
   });
 
-  // Handle user changes (logout or different user login)
+  // If no branch is selected, automatically choose the first available branch.
   useEffect(() => {
-    if (!user) {
-      // User logged out
-      resetBranchState();
-      return;
+    if (branchData?.branches && !selectedBranch) {
+      const firstBranch = branchData.branches[0];
+      if (firstBranch) {
+        setSelectedBranch(firstBranch);
+        if (user) {
+          localStorage.setItem(`selected_branch_${user._id}`, JSON.stringify(firstBranch));
+        }
+      }
     }
+  }, [branchData, selectedBranch, user]);
 
-    // Check if user ID changed (different user logged in)
-    const storedUserId = localStorage.getItem(USER_ID_KEY);
-    if (storedUserId && storedUserId !== user._id) {
-      console.log('User changed, resetting branch state');
-      resetBranchState();
-    }
-    
-    // Update stored user ID
-    localStorage.setItem(USER_ID_KEY, user._id);
-    previousUserId.current = user._id;
-    
-  }, [user]);
-
-  // Load selected branch from localStorage only when user is logged in
-  // with additional validation to ensure branches belong to current user
+  // Keep the local storage in sync with the current selection.
   useEffect(() => {
     if (user) {
-      try {
-        const stored = localStorage.getItem(BRANCH_STORAGE_KEY);
-        const storedUserId = localStorage.getItem(USER_ID_KEY);
-        
-        // Only load if the stored branch belongs to current user
-        if (stored && storedUserId === user._id) {
-          const parsedBranch = JSON.parse(stored);
-          setSelectedBranch(parsedBranch);
-        } else if (stored) {
-          // Branch from different user - clear it
-          console.log('Branch from different user detected, clearing');
-          localStorage.removeItem(BRANCH_STORAGE_KEY);
-          setSelectedBranch(null);
-        }
-      } catch (error) {
-        console.error('Error parsing stored branch:', error);
-        localStorage.removeItem(BRANCH_STORAGE_KEY);
+      if (selectedBranch) {
+        localStorage.setItem(`selected_branch_${user._id}`, JSON.stringify(selectedBranch));
+      } else {
+        localStorage.removeItem(`selected_branch_${user._id}`);
       }
-    } else {
-      // No user - clear branch state
-      resetBranchState();
-    }
-  }, [user]);
-
-  // Update localStorage when selected branch changes
-  useEffect(() => {
-    if (selectedBranch && user) {
-      localStorage.setItem(BRANCH_STORAGE_KEY, JSON.stringify(selectedBranch));
-      localStorage.setItem(USER_ID_KEY, user._id);
-    } else if (!selectedBranch) {
-      localStorage.removeItem(BRANCH_STORAGE_KEY);
     }
   }, [selectedBranch, user]);
-
-  // Reset branches when component unmounts
-  useEffect(() => {
-    return () => {
-      if (!user) {
-        resetBranchState();
-      }
-    };
-  }, []);
 
   return (
     <BranchContext.Provider 
@@ -119,8 +68,7 @@ export const BranchProvider = ({ children }: { children: ReactNode }) => {
         selectedBranch, 
         setSelectedBranch, 
         branches: branchData?.branches || [],
-        isLoading,
-        resetBranchState
+        isLoading 
       }}
     >
       {children}
