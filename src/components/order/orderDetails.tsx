@@ -3,29 +3,41 @@ import { Box, Typography, Divider } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { orderService } from '../../services/order.service';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import React from 'react';
 
 export default function OrderDetailsPage() {
-  const { id } = useParams(); // Extract order ID from URL
-  const navigate = useNavigate()
+  // Ensure the parameter name matches your route definition.
+  // For a route defined as /order/:id, this is correct.
+  const { id } = useParams<{ id: string }>();
+  console.log('OrderDetailsPage: order id from params:', id);
+  const navigate = useNavigate();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['order', id],
-    queryFn: () => orderService.getById(id),
+    queryFn: () => {
+      if (!id) {
+        throw new Error('Order id is missing');
+      }
+      return orderService.getById(id);
+    },
+    enabled: Boolean(id), // Only run the query if id is defined
   });
 
   if (isLoading) return <div>Loading...</div>;
   if (isError) return <div>Error fetching order details</div>;
 
-  const order = data?.data; // Access the order data from the response
-  console.log(order);
-  
+  // Adjust this extraction based on your API response shape.
+  // For instance, if your API returns { order: { ... } } instead of { data: { ... } }
+  const order = data?.data || data?.order || data;
+  console.log('OrderDetailsPage: order data:', order);
 
-  if (!order) return <div>Order not found</div>;
+  // Check if order is missing or empty
+  if (!order || Object.keys(order).length === 0) return <div>Order not found</div>;
 
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
-       <ArrowBackIcon sx={{cursor : 'pointer'}} onClick={()=> navigate(-1)} /> Order 
+        <ArrowBackIcon sx={{ cursor: 'pointer' }} onClick={() => navigate(-1)} /> Order
       </Typography>
       <Divider sx={{ my: 2 }} />
 
@@ -33,7 +45,7 @@ export default function OrderDetailsPage() {
         Order Items
       </Typography>
       {order.items && order.items.length > 0 ? (
-        order.items.map((item) => (
+        order.items.map((item: any) => (
           <Box key={item._id} sx={{ mb: 2 }}>
             <Typography>
               {item.quantity}x {item.foodItem?.name || 'Unnamed Item'}
@@ -41,7 +53,7 @@ export default function OrderDetailsPage() {
             {item.addOns && item.addOns.length > 0 && (
               <Box sx={{ pl: 2 }}>
                 <Typography variant="subtitle2">Add-Ons:</Typography>
-                {item.addOns.map((addOn) => (
+                {item.addOns.map((addOn: any) => (
                   <Typography key={addOn._id}>
                     - {addOn.name} (₹{addOn.price})
                   </Typography>
@@ -61,7 +73,7 @@ export default function OrderDetailsPage() {
       {order.taxDetails && order.taxDetails.length > 0 && (
         <Box sx={{ pl: 2 }}>
           <Typography variant="subtitle2">Tax Details:</Typography>
-          {order.taxDetails.map((tax) => (
+          {order.taxDetails.map((tax: any) => (
             <Typography key={tax._id}>
               - {tax.name} ({tax.rate}%): ₹{tax.amount}
             </Typography>
@@ -88,7 +100,7 @@ export default function OrderDetailsPage() {
         <Typography>Delivery Partner: {order.deliveryPartner}</Typography>
       )}
 
-<Typography variant="h6" gutterBottom>
+      <Typography variant="h6" gutterBottom>
         Customer Details
       </Typography>
       <Typography>Name: {order.customer?.name || 'N/A'}</Typography>

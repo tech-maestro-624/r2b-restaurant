@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { 
   Box, 
   Card, 
@@ -17,18 +17,61 @@ import { format } from 'date-fns';
 import { Order } from '../../../types/order';
 
 interface OrderCardProps {
-  order: Order;
+  order?: Order; // order is optional to allow debugging when it's undefined
   onViewDetails: (order: Order) => void;
   onStatusChange: (orderId: string, status: Order['status']) => void;
 }
 
+// Helper function to safely format date values
+function safeFormatDate(dateValue: any, dateFormat: string = 'PPp') {
+  if (!dateValue) return '';
+  const date = new Date(dateValue);
+  if (isNaN(date.getTime())) return '';
+  return format(date, dateFormat);
+}
+
 export default function OrderCard({ order, onViewDetails, onStatusChange }: OrderCardProps) {
+  // Debug: log the order prop to check if it's being received correctly.
+  useEffect(() => {
+    console.log('OrderCard received order:', order);
+  }, [order]);
+
+  if (!order) {
+    return (
+      <Card
+        sx={{
+          backgroundColor: '#2A2D32',
+          color: 'white',
+          fontSize: '1.1rem',
+          borderRadius: '12px',
+          p: 2,
+          m: 2
+        }}
+      >
+        <Typography variant="h6">Order not found</Typography>
+      </Card>
+    );
+  }
+
   const [status, setStatus] = useState<Order['status']>(order.status);
 
+  // Prevent event bubbling from the Select component
   const handleStatusChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    event.stopPropagation();
     const newStatus = event.target.value as Order['status'];
     setStatus(newStatus);
     onStatusChange(order._id, newStatus);
+  };
+
+  // Card click handler for viewing order details
+  const handleCardClick = () => {
+    onViewDetails(order);
+  };
+
+  // Icon button click handler with propagation prevention
+  const handleIconButtonClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    onViewDetails(order);
   };
 
   return (
@@ -38,16 +81,17 @@ export default function OrderCard({ order, onViewDetails, onStatusChange }: Orde
         color: 'white',
         fontSize: '1.1rem',
         borderRadius: '12px',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        mb: 2
       }}
-      onClick={() => onViewDetails(order)}
+      onClick={handleCardClick}
     >
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
           <Typography variant="h6" sx={{ fontSize: '1.5rem' }}>
             #{order?.orderId}
           </Typography>
-          <IconButton size="small" onClick={() => onViewDetails(order)}>
+          <IconButton size="small" onClick={handleIconButtonClick}>
             <Eye size={20} color="white" />
           </IconButton>
         </Box>
@@ -61,7 +105,7 @@ export default function OrderCard({ order, onViewDetails, onStatusChange }: Orde
           <Chip label={order.paymentMethod} variant="outlined" size="small" />
         </Stack>
 
-        {/* New field for Restaurant Name */}
+        {/* Restaurant Name */}
         <Typography variant="body2" sx={{ color: 'white', fontSize: '1.1rem' }} gutterBottom>
           Restaurant: {order?.restaurant?.name || 'N/A'}
         </Typography>
@@ -80,7 +124,7 @@ export default function OrderCard({ order, onViewDetails, onStatusChange }: Orde
           Total: ₹ {(order?.grandTotal).toFixed(2)}
         </Typography>
         <Typography variant="caption" display="block" sx={{ mt: 1, color: 'white', fontSize: '0.9rem' }}>
-          {format(new Date(order?.createdAt), 'PPp')}
+          {safeFormatDate(order?.createdAt, 'PPp')}
         </Typography>
 
         <Box sx={{ position: 'relative', mt: 2 }}>

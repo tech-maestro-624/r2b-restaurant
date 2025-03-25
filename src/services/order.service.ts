@@ -19,9 +19,11 @@ export const orderService = {
       }},
     })},
 
-  getById: ( orderId: string) =>
-    api.get<Order>(`/order/${orderId}`),
-
+    getById: (orderId: string) =>
+      api
+        .get<Order>(`/order/${orderId}`)
+        .then(res => res.data),
+        
   updateStatus: ( orderId: string, status: Order['status']) =>
     api.put<Order>(`/order/${orderId}/status`, { status }),
 

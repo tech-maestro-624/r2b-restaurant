@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 const Profile: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-
+console.log('user',user);
   const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [nameError, setNameError] = useState('');
@@ -18,6 +18,7 @@ const Profile: React.FC = () => {
     const fetchUserData = async () => {
       const userData = await branchService.getCurrentUser();
       console.log(userData)
+      console.log('userData.name',userData.name);
       if (userData) {
         setName(userData.name);
         setPhoneNumber(userData.phoneNumber);
