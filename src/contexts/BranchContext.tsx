@@ -45,7 +45,7 @@ export const BranchProvider = ({ children }: { children: ReactNode }) => {
       if (firstBranch) {
         setSelectedBranch(firstBranch);
         if (user) {
-          localStorage.setItem(`selected_branch_${user._id}`, JSON.stringify(firstBranch));
+          localStorage.setItem(`selected_branch`, JSON.stringify(firstBranch));
         }
       }
     }
@@ -55,9 +55,9 @@ export const BranchProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (user) {
       if (selectedBranch) {
-        localStorage.setItem(`selected_branch_${user._id}`, JSON.stringify(selectedBranch));
+        localStorage.setItem(`selected_branch`, JSON.stringify(selectedBranch));
       } else {
-        localStorage.removeItem(`selected_branch_${user._id}`);
+        localStorage.removeItem(`selected_branch`);
       }
     }
   }, [selectedBranch, user]);

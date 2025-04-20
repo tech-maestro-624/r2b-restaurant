@@ -61,6 +61,15 @@ const initializeOperationalHours = (existingOperationalHours) => {
   });
 };
 
+const preventInvalidTab = (e: React.KeyboardEvent, isValid: boolean) => {
+  if (!isValid && (e.key === 'Tab' || e.key === 'Enter')) {
+    e.preventDefault();
+    // Optional: Add a visual feedback
+    const input = e.target as HTMLInputElement;
+    input.focus();
+  }
+};
+
 export default function BranchForm({ branch, onClose, onSubmit }) {
   const {
     control,
@@ -122,6 +131,13 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
     onSubmit(processedData);
   };
 
+  // Add blur handler for validation
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    if (!e.target.value) {
+      e.target.focus();
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} style={{ width: "100%" }}>
       <Box sx={{ p: 3 }}>
@@ -141,6 +157,8 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
                   {...register("name", { required: "Branch name is required" })}
                   error={!!errors.name}
                   helperText={errors.name?.message}
+                  onKeyDown={(e) => preventInvalidTab(e, !errors.name)}
+                  onBlur={handleBlur}
                 />
               </Grid>
 
@@ -152,6 +170,8 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
                   {...register("address", { required: "Address is required" })}
                   error={!!errors.address}
                   helperText={errors.address?.message}
+                  onKeyDown={(e) => preventInvalidTab(e, !errors.address)}
+                  onBlur={handleBlur}
                 />
               </Grid>
 
@@ -169,6 +189,8 @@ export default function BranchForm({ branch, onClose, onSubmit }) {
                   })}
                   error={!!errors.phoneNumber}
                   helperText={errors.phoneNumber?.message}
+                  onKeyDown={(e) => preventInvalidTab(e, !errors.phoneNumber)}
+                  onBlur={handleBlur}
                 />
               </Grid>
 
