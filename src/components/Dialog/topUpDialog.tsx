@@ -69,7 +69,7 @@ const TopUpDialog: React.FC<TopUpDialogProps> = ({
       <DialogContent sx={{ bgcolor: '#2A2D32', color: 'white' }}>
         <Stack direction="column" spacing={2} sx={{ mt: 1 }}>
           <Typography variant="body1">
-            <strong>Per Order Value:</strong> {perOrderValue.toFixed(2)}
+            <strong>Per Order Value:</strong> {perOrderValue}
           </Typography>
           <TextField
             label="Number of Orders"
@@ -87,7 +87,7 @@ const TopUpDialog: React.FC<TopUpDialogProps> = ({
             sx={{ input: { color: 'white' }, label: { color: 'white' } }}
           />
           <Typography variant="body1">
-            <strong>Total Cost:</strong> {totalCost.toFixed(2)}
+            <strong>Total Cost:</strong> {totalCost}
           </Typography>
         </Stack>
         {(localError || error) && (
